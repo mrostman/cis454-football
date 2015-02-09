@@ -46,7 +46,11 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\animTest1.cs" />
+     <Compile Include="Assets\Classes\DatabaseController.cs" />
+     <Compile Include="Assets\Classes\GameController.cs" />
+     <Compile Include="Assets\Classes\Play.cs" />
+     <Compile Include="Assets\Classes\Player.cs" />
+     <Compile Include="Assets\Classes\PlayerToken.cs" />
      <Compile Include="Assets\test-scripts\test1.cs" />
      <None Include="Assets\Standard Assets\Projectors\Guidelines.txt" />
      <None Include="Assets\Standard Assets (Mobile)\Shaders\Particle Shaders\Mobile Multiply Culled.shader" />
