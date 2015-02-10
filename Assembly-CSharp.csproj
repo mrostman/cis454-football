@@ -47,7 +47,9 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Classes\DatabaseController.cs" />
+     <Compile Include="Assets\Classes\DefensePlayer.cs" />
      <Compile Include="Assets\Classes\GameController.cs" />
+     <Compile Include="Assets\Classes\OffencePlayer.cs" />
      <Compile Include="Assets\Classes\Play.cs" />
      <Compile Include="Assets\Classes\Player.cs" />
      <Compile Include="Assets\Classes\PlayerToken.cs" />
