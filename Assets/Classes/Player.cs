@@ -6,6 +6,7 @@ public class Player : MonoBehaviour {
 	Vector2 shiftLocation;
 	Vector2 Motion;
 	int Assignment;
+	byte position;
 	enum PositionAbbriviations : byte { QB, F, H, Y, X, Z, C, FG, BG, FT, BT };
 
 
