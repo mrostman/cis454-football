@@ -21,7 +21,7 @@ public class GameController : MonoBehaviour {
 	}
 
 	Play SelectPlay () {
-
+		return null;
 	}
 
 	void EndPlay () {
@@ -32,8 +32,8 @@ public class GameController : MonoBehaviour {
 		
 	}
 	
-	float SRSRecalculate (int correctness, float sinceLastPlayed) {
-		
+	double SRSRecalculate (int correctness, float sinceLastPlayed) {
+		return 0.0;
 	}
 
 	void QueueUpdate () {
