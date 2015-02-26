@@ -8,6 +8,9 @@ public class PlayerToken : MonoBehaviour {
 	private Vector3 offset;
 	private float heightFactor = 20.0f / Screen.height;
 	private int widthFactor = Screen.width;
+	private int gridSize = 0;
+	private Vector3 target;
+	private bool snapping = false;
 	Vector3 location;
 	byte position;
 	byte team;
@@ -21,10 +24,27 @@ public class PlayerToken : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
+		// Handle snapping to grid. Target is determined on mouseUp (that is, when the user 'drops' the playerToken
+		float distanceToTarget = Vector3.Distance(this.transform.position, target);
+		if (snapping && distanceToTarget > 0.001f)
+		{
+			if (distanceToTarget > 0.005f)
+				this.transform.position = Vector3.MoveTowards (this.transform.position, 
+				                                               target,
+				                                               distanceToTarget / 0.005f);
+			else
+				this.transform.position = Vector3.MoveTowards (this.transform.position,
+				                                               target,
+				                                               distanceToTarget);
+		}
+		else
+		{
+			snapping = false;
+		}
 	}
 
 	void OnMouseDown() {
+		snapping = false;
 		Debug.Log ("Clicked" + Input.mousePosition);
 		offset = new Vector3 (Input.mousePosition.x, Input.mousePosition.y, 0);
 		}
@@ -37,4 +57,11 @@ public class PlayerToken : MonoBehaviour {
 		offset.y = Input.mousePosition.y;
 		                  
 	}
+
+	void OnMouseUp()
+	{
+		snapping = true;
+		target = new Vector3 (Mathf.Round (this.transform.position.x), Mathf.Round (this.transform.position.y), this.transform.position.z);
+	}
+
 }	
