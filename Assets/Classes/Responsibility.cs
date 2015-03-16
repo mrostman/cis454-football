@@ -3,6 +3,8 @@ using System.Collections;
 
 public class Responsibility : MonoBehaviour {
 	int id;
+	Vector2[] stops;
+	Texture icon, displayPath;
 	
 	// Use this for initialization
 	void Start () {
@@ -33,5 +35,10 @@ public class Responsibility : MonoBehaviour {
 		// Return true if the fields match:
 		return (id == p.id);
 	}
+	
+	// Getters
+	public int GetID() { return id; }
+	public Texture GetIcon() { return icon; }
+	public Texture GetDisplayPath() { return displayPath; }
 	
 }

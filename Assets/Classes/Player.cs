@@ -4,11 +4,9 @@ using Cloudbase;
 using Cloudbase.DataCommands;
 
 public class Player : MonoBehaviour { 
-	Vector2 location;
-	Vector2 shiftLocation;
-	Vector2 Motion;
+	Vector2 location, shiftLocation, Motion;
 	int Assignment;
-	string positionAbbrivation;
+	string positionAbbrevation, positionName;
 	bool userTeam;
 	bool initialized = false;
 	PlayerToken token;
@@ -16,12 +14,9 @@ public class Player : MonoBehaviour {
 
 	
 	void Awake() {
-
 	}
 
-	// Use this for initialization
 	void Start () {
-
 	}
 	
 	// Update is called once per frame, handles interaction with PlayerToken
@@ -31,34 +26,35 @@ public class Player : MonoBehaviour {
 		if (token == null || initialized == false)
 			return;
 
-		// 1: If the PlayerToken has not yet been initialized, initialize it.
-		if (!(token.IsInitialized()))
-			token.Initialize (userTeam, positionAbbrivation, location.x, location.y);
+		// 1: Update internal values based on PlayerToken values
+		UpdateLocation();
 		
-		// 2: Update internal values based on PlayerToken values
-		location.x = token.GetX ();
-		location.y = token.GetY ();
-		
-		// 3: If the token has been doubleclicked, pop the menu.
+		// 2: If the token has been doubleclicked, pop the menu.
 		if (token.popMenu)
 		{
 			PopMenu();
 			token.popMenu = false;
 		}
 	}
-
-	public void setLocation(Vector3 loc)
+	
+	// Update subroutines
+	void UpdateLocation()
 	{
-		location = new Vector2 (loc.x, loc.y);
+		location.x = token.GetX ();
+		location.y = token.GetY ();
 	}
 
-	public void setPosition(byte pos)
+	void Initialize(bool iUserTeam, string iPositionAbbreviation, string iPositionName, int iX, int iY)
 	{
-	}
-
-	public void createToken()
-	{
-
+		// Set initial values
+		userTeam = iUserTeam;
+		positionAbbrevation = iPositionAbbreviation;
+		positionName = iPositionName;
+		location = new Vector2(iX, iY);
+		
+		// Create an initialize new playerToken
+		token = new PlayerToken();
+		token.Initialize (userTeam, positionAbbrevation, location.x, location.y);
 	}
 	
 	// Method to show the menu when requested
