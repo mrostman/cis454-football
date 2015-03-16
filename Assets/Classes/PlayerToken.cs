@@ -2,6 +2,7 @@
 using System.Collections;
 
 [RequireComponent(typeof(BoxCollider))]
+[System.Serializable]
 
 public class PlayerToken : MonoBehaviour {
 	private Vector3 offset;
@@ -14,10 +15,13 @@ public class PlayerToken : MonoBehaviour {
 	private Player player;
 	private int doubleClickCount = 0;
 	Vector3 location;
-	byte position;
-	byte team;
-	enum PositionAbbriviation : byte { QB, F, H, Y, X, Z, C, FG, BG, FT, BT };
-	enum Teams : byte { Offense, Defense };
+	bool userTeam = false;
+	string positionAbbreviation = "";
+	bool initialized = false;
+	public bool popMenu = false; // Flag indicating the menu has been requested
+	public Material userTeamMaterial;
+	public Material otherTeamMaterial;
+
 
 	// Use this for initialization
 	void Start () {
@@ -33,8 +37,6 @@ public class PlayerToken : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-
-
 		// Handle snapping to grid. Target is determined on mouseUp (that is, when the user 'drops' the playerToken
 		float distanceToTarget = Vector3.Distance(this.transform.position, target);
 		if (snapping && distanceToTarget > 0.001f)
@@ -58,7 +60,10 @@ public class PlayerToken : MonoBehaviour {
 		// Check for double click
 		Debug.Log (doubleClickCount);
 		if (doubleClickCount > 0)
-						Debug.Log ("DoubleClick");
+		{
+			Debug.Log ("DoubleClick");
+			popMenu = true;
+		}
 		// If not a double click, start dragging the player
 		else
 		{
@@ -103,7 +108,43 @@ public class PlayerToken : MonoBehaviour {
 		}
 
 		// If placement is valid, set snapping so update will move the token
-		//	player.setLocation(target);
 		snapping = true;
 	}
+
+	// Set up a newly created token
+	public void Initialize(bool iUserTeam, string iPositionAbbreviation, float iLocationX, float iLocationY)
+	{
+		if (initialized)
+			// Throw error if an attempt is made to initialize an already initialized token
+			Debug.LogError ("Attempting to initialize already initialized token!");
+		else {
+			// Set values
+			userTeam = iUserTeam;
+			positionAbbreviation = iPositionAbbreviation;
+			location.x = iLocationX;
+			location.y = iLocationY;
+			location.z = 1f;
+			initialized = true;
+			
+			// Set the token to visually display it's position
+			GetComponentInChildren<TextMesh>().text = positionAbbreviation;
+			
+			// Set the token's color/skin based on it's team
+			// TODO
+		}
+	}
+
+	// Getters:
+	
+	// Check if the token has been initialized
+	public bool IsInitialized()
+	{
+		return initialized;
+	}
+	
+	// Return the x and y components of location
+	public float GetX() { return location.x; }
+	public float GetY() { return location.y; }
+	
+	// Other getters
 }	

@@ -53,6 +53,7 @@
      <Compile Include="Assets\Classes\Play.cs" />
      <Compile Include="Assets\Classes\Player.cs" />
      <Compile Include="Assets\Classes\PlayerToken.cs" />
+     <Compile Include="Assets\Classes\Responsibility.cs" />
      <Compile Include="Assets\test-scripts\test1.cs" />
      <None Include="Assets\Standard Assets\Projectors\Guidelines.txt" />
      <None Include="Assets\Standard Assets (Mobile)\Shaders\Particle Shaders\Mobile Multiply Culled.shader" />
