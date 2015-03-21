@@ -21,7 +21,7 @@ public class PlayerToken : MonoBehaviour {
 	public bool popMenu = false; // Flag indicating the menu has been requested
 	public Material userTeamMaterial;
 	public Material otherTeamMaterial;
-
+	System.DateTime down;
 
 	// Use this for initialization
 	void Start () {
@@ -57,6 +57,7 @@ public class PlayerToken : MonoBehaviour {
 	}
 
 	void OnMouseDown() {
+	
 		// Check for double click
 		Debug.Log (doubleClickCount);
 		if (doubleClickCount > 0)
