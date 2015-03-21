@@ -57,7 +57,7 @@ public class PlayerToken : MonoBehaviour {
 	}
 
 	void OnMouseDown() {
-	
+		
 		// Check for double click
 		Debug.Log (doubleClickCount);
 		if (doubleClickCount > 0)
