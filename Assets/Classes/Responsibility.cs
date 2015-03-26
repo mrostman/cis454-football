@@ -2,8 +2,8 @@
 using System.Collections;
 
 public class Responsibility : MonoBehaviour {
-	int id;
-	Vector2[] stops;
+	int id { get; set;}
+	Vector2[] stops { get; set;}
 	Texture icon, displayPath;
 	
 	// Use this for initialization

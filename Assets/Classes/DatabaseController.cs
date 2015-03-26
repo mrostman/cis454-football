@@ -15,8 +15,9 @@ bool playCreated = false;
 ParseObject responsib = null;
 ParseObject srsLine;
 ParseObject testParseObj;
-Task t1, t2, t3;
-IEnumerable<ParseObject> result1, result2, result3;
+Task t1, t2, t3, t4;
+IEnumerable<ParseObject> result1, result2, result3, result4;
+List<ParseObject> offensiveTeams = new List<ParseObject>();
 
 	// Use this for initialization
 	void Start () {
@@ -82,6 +83,7 @@ IEnumerable<ParseObject> result1, result2, result3;
 		ParseQuery<ParseObject> query1 = ParseObject.GetQuery("SRSData").WhereEqualTo("User",ParseUser.CurrentUser);
 		ParseQuery<ParseObject> query2 = ParseObject.GetQuery("Play").WhereNotEqualTo("Name","THIS NAME IS FAKE");
 		ParseQuery<ParseObject> query3 = ParseObject.GetQuery("History").WhereEqualTo("User",ParseUser.CurrentUser);
+		ParseQuery<ParseObject> query4 = ParseObject.GetQuery("OffensiveTeam").WhereNotEqualTo("ObjectID","0000000");
 		Debug.Log (ParseUser.CurrentUser.ObjectId);
 		
 		
@@ -95,6 +97,8 @@ IEnumerable<ParseObject> result1, result2, result3;
 		tasks.Add (t2);
 		t3 = query3.FindAsync().ContinueWith(t => { result3 = t.Result ;});
 		tasks.Add (t3);
+		t4 = query4.FindAsync().ContinueWith(t => { foreach(ParseObject n in t.Result) { offensiveTeams.Add(n); } });//result4 = t.Result ;});
+		tasks.Add (t4);
 		Task task2 = Task.WhenAll (tasks).ContinueWith(q => {checkGet();});
 		//return Task.WhenAll(tasks);
 	}
@@ -103,6 +107,8 @@ IEnumerable<ParseObject> result1, result2, result3;
 		Debug.Log ("Checking...");
 		Debug.Log (t2.IsCompleted);
 		//Debug.Log ("ID: " + re.ObjectId);
+		
+		//foreach(ParseObject n in result4){ offensiveTeams.Add(n); }
 		foreach(ParseObject i in result1)
 		{
 			Debug.Log (i.ObjectId);
@@ -111,10 +117,15 @@ IEnumerable<ParseObject> result1, result2, result3;
 			Debug.Log (s1);
 			//Debug.Log (exists);
 		}
+		List<ParseObject> playList = new List<ParseObject>();
 		foreach(ParseObject j in result2)
 		{
-			Debug.Log ("Looped");
 			Debug.Log (j.ObjectId);
+			Debug.Log (j.Get<string>("Name"));
+			j["OffensiveTeam"] = offensiveTeams.Find(x => x.ObjectId.Equals(j.Get<ParseObject>("OffensiveTeam").ObjectId));
+			
+			Debug.Log (j.Get<ParseObject>("OffensiveTeam").IsDataAvailable);
+			//Debug.Log ("OffensiveTeam: " + offensiveTeams.Find(x => x.ObjectId.Equals(j.Get<ParseObject>("OffensiveTeam").ObjectId)).IsDataAvailable);
 		}
 		foreach(ParseObject k in result3)
 		{
