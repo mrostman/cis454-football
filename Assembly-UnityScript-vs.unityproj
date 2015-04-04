@@ -73,16 +73,16 @@
      <None Include="Assets\Standard Assets (Mobile)\Shaders\Lightmap Shaders (Legacy)\Mobile Lightmap AlphaTest.shader" />
      <None Include="Assets\Parse.Unity.xml" />
  <Reference Include="Assembly-UnityScript-firstpass">
- <HintPath>C:/Users/Jason/Documents/GitHub/cis454-football/Library/ScriptAssemblies/Assembly-UnityScript-firstpass.dll</HintPath>
+ <HintPath>C:/Users/Matt/Documents/GitHub/cis454-football/Library/ScriptAssemblies/Assembly-UnityScript-firstpass.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files (x86)/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/4.6.3/UnityEngine.UI.dll</HintPath>
  </Reference>
  <Reference Include="Parse.Unity">
- <HintPath>C:/Users/Jason/Documents/GitHub/cis454-football/Assets/Parse.Unity.dll</HintPath>
+ <HintPath>C:/Users/Matt/Documents/GitHub/cis454-football/Assets/Parse.Unity.dll</HintPath>
  </Reference>
  <Reference Include="CBHelper-Unity">
- <HintPath>C:/Users/Jason/Documents/GitHub/cis454-football/Assets/Plugins/CBHelper-Unity.dll</HintPath>
+ <HintPath>C:/Users/Matt/Documents/GitHub/cis454-football/Assets/Plugins/CBHelper-Unity.dll</HintPath>
  </Reference>
   </ItemGroup>
   <ItemGroup>

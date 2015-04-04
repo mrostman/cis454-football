@@ -1,22 +1,32 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Cloudbase;
-using Cloudbase.DataCommands;
+using Parse;
 
 public class Player : MonoBehaviour { 
-	Vector2 location, shiftLocation, Motion;
-	int Assignment;
-	string positionAbbrevation, positionName;
-	bool userTeam;
-	bool initialized = false;
+	Vector2 location { get; }
+	Vector2 motion { get; }
+	Vector2[] shifts { get; }
+	string abbreviation{ get; }
+	string name { get; }
+	bool userTeam { get; }
+	bool initialized  { get; }
+	bool controllable, display;
 	PlayerToken token;
-	Responsibility responsibility;	
+	Responsibility responsibility { get; }
 
 	
 	void Awake() {
+	initialized = false;
 	}
 
 	void Start () {
+	}
+	
+	void initialize(ParseObject iPlayer)
+	{
+		display = false;
+		controllable = iPlayer.Get(con;
+		location = new Vector2( iPlayer.Get ("	
 	}
 	
 	// Update is called once per frame, handles interaction with PlayerToken
@@ -43,18 +53,12 @@ public class Player : MonoBehaviour {
 		location.x = token.GetX ();
 		location.y = token.GetY ();
 	}
+	
+
 
 	void Initialize(bool iUserTeam, string iPositionAbbreviation, string iPositionName, int iX, int iY)
 	{
-		// Set initial values
-		userTeam = iUserTeam;
-		positionAbbrevation = iPositionAbbreviation;
-		positionName = iPositionName;
-		location = new Vector2(iX, iY);
-		
-		// Create an initialize new playerToken
-		token = new PlayerToken();
-		token.Initialize (userTeam, positionAbbrevation, location.x, location.y);
+
 	}
 	
 	// Method to show the menu when requested
