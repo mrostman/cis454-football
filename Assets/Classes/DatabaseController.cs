@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 public class DatabaseController : MonoBehaviour {
 	ParseObject retrieved;
+	float srsDefaultValue = 1;
 	List<ParseObject> playQueryResults = new List<ParseObject> ();
 	List<ParseObject> historyQueryResults = new List<ParseObject> ();
 	List<ParseObject> srsQueryResults = new List<ParseObject> ();
@@ -67,6 +68,8 @@ public class DatabaseController : MonoBehaviour {
 				//Debug.Log (playerTask.IsCompleted);
 				//Debug.Log ("Responsibility Task complete:");
 				//Debug.Log (responsibilityTask.IsCompleted);
+
+				//CalculateSRSTotal();
 				RebuildReferences();
 			});
 		});
@@ -343,6 +346,45 @@ public class DatabaseController : MonoBehaviour {
 				//Debug.Log (m.Get<ParseObject>("Responsib").ObjectId);
 			}
 		}
+	}
+
+	// TODO: implement once Play class structure is decided
+	bool UpdatePlay (Play inputPlay)
+	{
+		return true;
+	}
+
+	float CalculateSRSTotal ()
+	{
+		float srsTotal = 0;
+		int loopcounter = 0;
+
+		foreach (ParseObject m in playQueryResults) 
+		{
+			float srsReference;
+
+			if (srsQueryResults.Count == 1)
+			{
+				ParseObject srsRow = srsQueryResults[0];
+				bool result = srsRow.TryGetValue(m.ObjectId.ToString (), out srsReference);
+				//Debug.Log ("play object ID: " + m.ObjectId);
+				//Debug.Log ("result: " + result);
+				if (!result)
+				{
+					srsReference = srsDefaultValue;
+					srsRow[m.ObjectId] = srsReference;
+				}
+				srsTotal = srsTotal + srsReference;
+			}
+			else
+			{
+				Debug.Log ("more than one set of srs coefficients for current user: ");
+			}
+		}
+
+		//Debug.Log ("srs total: ");
+		//Debug.Log (srsTotal);
+		return srsTotal;
 	}
 
 	// Update is called once per frame
