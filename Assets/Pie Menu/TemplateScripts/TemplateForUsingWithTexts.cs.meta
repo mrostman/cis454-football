@@ -1,0 +1,38 @@
+fileFormatVersion: 2
+guid: a4f31e974d32b6c4a8d2791ea97dd705
+labels:
+- Array
+- Circle
+- Circular
+- Gui
+- Menu
+- Pi
+- Pie
+- Rotation
+- Transition
+- Architecture
+- Axis
+- Structure
+- System
+- UGUI
+- Ngui
+- Ui
+- Multitouch
+- Cursor
+- Legacy
+- Documentation
+- Unity
+- Script
+- Template
+- Advanced
+- Method
+- Execute
+- Basic
+- Color
+- Mixer
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 

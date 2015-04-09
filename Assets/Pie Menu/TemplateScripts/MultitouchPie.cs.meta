@@ -1,0 +1,29 @@
+fileFormatVersion: 2
+guid: b8e2e222fedc6f246a5d884e2f3c9585
+labels:
+- Script
+- Template
+- Advanced
+- Multitouch
+- Array
+- Circle
+- Circular
+- Gui
+- Menu
+- Pi
+- Pie
+- Rotation
+- Transition
+- Axis
+- Structure
+- System
+- UGUI
+- Ngui
+- Ui
+- Cursor
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 

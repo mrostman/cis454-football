@@ -1,0 +1,27 @@
+fileFormatVersion: 2
+guid: 9c308f5ea67b3de4485249ed0c35573a
+labels:
+- Array
+- Circle
+- Circular
+- Gui
+- Menu
+- Pi
+- Pie
+- Rotation
+- Transition
+- Architecture
+- Axis
+- Structure
+- System
+- UGUI
+- Ngui
+- Ui
+- Multitouch
+- Cursor
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 

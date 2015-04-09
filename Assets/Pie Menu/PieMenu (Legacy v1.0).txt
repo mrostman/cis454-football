@@ -1,0 +1,447 @@
+﻿/// <summary>
+/// Pie Menu Z
+/// Created by: Zalán Kórósi
+/// Version: 1.0
+/// </summary>
+
+using UnityEngine;
+using System.Collections;
+
+[System.Serializable]
+public class PieMenu {
+
+	public enum Shape {
+		Circle,
+		Semi_Circle
+	}
+
+	public string XAxis = "Mouse X";
+	public string YAxis = "Mouse Y";
+
+	/// <summary>
+	/// Slow motion slows down the game if the pie menu is active.
+	/// </summary>
+	public bool useSlowMotion = false;
+	[Range(0,1)]
+	public float SlowMotionTimeScale = 0.1f;
+
+
+	[Range(0,2)]
+	public float Sensitivity = 1f;
+	[Range(0,2)]
+	public float Treshold = 0.05f;
+
+
+	public Shape shape = Shape.Circle;
+
+	[Range(0,360)]
+	public float RotationInDegrees = 0;
+	public bool LockAndHideCursor = true;
+	public bool SnapToOption = false;
+
+	public float Radius = 150;
+	public Vector2 Center = Vector2.zero;
+
+
+	[Range(0,10)]
+	/// <summary>
+	/// The text length will influence it's box's width this much.
+	/// </summary>
+	public float TextWidthMultiplier = 5f;
+	/// <summary>
+	/// Size of one option's box/image. Width = Height = OptionsStandardSize.
+	/// </summary>
+	public float OptionsStandardSize = 50f;
+
+	/// <summary>
+	/// This image will always rotate towards the selected.
+	/// </summary>
+	public Texture2D CenterImage;
+
+	/// <summary>
+	/// This image will stay in the background and won't rotate.
+	/// </summary>
+	public Texture2D BackgroundImage;
+	[Range(0,5)]
+	public float CenterImageSizeMultiplier = 1f;
+	[Range(0,5)]
+	public float BackgroundImageSizeMultiplier = 2f;
+
+	public GUISkin Skin;
+	public string StyleNameForNormal = "Button";
+	public string StyleNameForSelected = "Button";
+	public Color CenterImageTint = Color.white;
+	public Color SelectedOptionTint = Color.green;
+
+
+	private float currentRadius;
+	private GUIContent[] Options;
+	private bool showThePie = false;
+	private bool Increase = false;
+	private Matrix4x4 GUIBuffer;
+	private float rotation = 0;
+	private float prevrotation = 0;
+	private int selectnum = 0;
+	private bool changed = false;
+	private System.Object PointerToDataArray;
+	private bool frozen = false;
+
+	/// <summary>
+	/// Returns true if the Pie Menu is frozen. (It's not respondind and gets a grey tint)
+	/// </summary>
+	public bool Frozen {
+		get {
+			return frozen;
+		}
+	}
+
+	/// <summary>
+	/// Returns a pointer to the options array last time given. For example: this function is ideal if you want to get the current options set to compare it inside a statement.
+	/// </summary>
+	public System.Object MenuSet {
+		get {
+			return PointerToDataArray;
+		}
+	}
+
+	/// <summary>
+	/// Returns true if the Pie Menu is visible and active.
+	/// </summary>
+	public bool Active {
+		get {
+			return showThePie;
+		}
+	}
+
+	/// <summary>
+	/// Returns the index number of the Pie Menu selection.
+	/// </summary>
+	public int Selected {
+		get {
+			return selectnum;
+		}
+	}
+
+	/// <summary>
+	/// Returns the selected Object itself as GUIContent.
+	/// </summary>
+	public GUIContent SelectedObject {
+		get {
+			return Options[selectnum];
+		}
+	}
+
+	/// <summary>
+	/// Returns true if the Pie Menu selection was changed.
+	/// </summary>
+	public bool Changed {
+		get {
+			bool retval = changed;
+			changed = false;
+			return retval;
+		}
+	}
+
+	/// <summary>
+	/// Basic constructor. You don't need to create a new Pie Menu if it is defined public in a MonoBehaviour Environment. (Unity does it)
+	/// </summary>
+	public PieMenu () {
+	}
+
+	/// <summary>
+	/// Initializes and Opens the Pie Menu with a nice transition.
+	/// </summary>
+	public PieMenu InitPie (GUIContent[] options)
+	{
+		PointerToDataArray = options;
+		Options = options;
+		InitPie();
+		return this;
+	}
+
+	/// <summary>
+	/// Initializes and Opens the Pie Menu with a nice transition.
+	/// </summary>
+	public PieMenu InitPie (string[] options)
+	{
+		PointerToDataArray = options;
+		Options = new GUIContent[options.Length];
+		for (int i = 0; i < Options.Length; i++) {
+			Options[i] = new GUIContent(options[i]);
+		}
+		InitPie();
+		return this;
+	}
+
+	/// <summary>
+	/// Inner function for finalizing the Initialization.
+	/// </summary>
+	void InitPie ()
+	{
+		if (LockAndHideCursor) {
+			Screen.lockCursor = true;
+			Screen.showCursor = false;
+		}
+		showThePie = true;
+		changed = false;
+		StartIt();
+	}
+
+	/// <summary>
+	/// Returns true and opens the Pie Menu if it could be opened. Else returns false. Use this if you don't want to change the option array.
+	/// </summary>
+	public bool OpenPie () {
+		if (Options != null) {
+			InitPie();
+			return true;
+		}
+		else return false;
+	}
+
+	bool transition = false;
+	GUIContent[] transitionContent;
+
+	/// <summary>
+	/// Loads up the new option (GUIContent) array with a nice transition.
+	/// </summary>
+	public void TransitionPie (GUIContent[] options)
+	{
+		PointerToDataArray = options;
+		StopIt();
+		transition = true;
+		transitionContent = options;
+	}
+
+	/// <summary>
+	/// Loads up the new option (string) array with a nice transition.
+	/// </summary>
+	public void TransitionPie (string[] options)
+	{
+		PointerToDataArray = options;
+		StopIt();
+		transition = true;
+		transitionContent = new GUIContent[options.Length];
+		for (int i = 0; i < transitionContent.Length; i++) {
+			transitionContent[i] = new GUIContent(options[i]);
+		}
+	}
+
+	/// <summary>
+	/// Returns the actual selected option and closes the Pie Menu.
+	/// </summary>
+	public int GetSelectedPieAndClose () {
+		StopIt();
+		Screen.lockCursor = false;
+		Screen.showCursor = true;
+		return selectnum;
+	}
+
+	/// <summary>
+	/// Closes the Pie Menu.
+	/// </summary>
+	public void Close () {
+		StopIt();
+		Screen.lockCursor = false;
+		Screen.showCursor = true;
+	}
+
+	/// <summary>
+	/// Closes the Pie Menu, but does not unlock cursor. Useful for nested Pie Menus.
+	/// </summary>
+	public void Return () {
+		StopIt();
+	}
+
+	/// <summary>
+	/// Freezes the Pie Menu and changes it's tint color to gray, so it will look like a "Not responding window"
+	/// </summary>
+	public void Freeze (bool value) {
+		frozen = value;
+	}
+
+
+	/// <summary>
+	/// Returns true if the firstvalue (degree) is closer to the secondvalue (degree) than other values calculated by the amount of slices.
+	/// </summary>
+	bool isNearDegree (float circle,float firstvalue, float secondvalue, int amountofslices) {
+		float OneSlice = circle / (amountofslices * 2);
+		firstvalue = firstvalue % circle;
+		secondvalue = secondvalue % circle;
+		if (firstvalue < 0) firstvalue += circle;
+		if (secondvalue < 0) secondvalue += circle;
+		
+		float diff = secondvalue - firstvalue;
+		if (diff < 0) diff += circle;
+		
+		if ((diff >= circle - OneSlice) || (diff < 0 + OneSlice)) return true;
+		else return false;
+		
+	}
+
+	/// <summary>
+	/// Inner helper function to show the pie.
+	/// </summary>
+	void StartIt () {
+			Increase = true;
+			if (useSlowMotion) Time.timeScale = SlowMotionTimeScale;
+			rotation = 0; prevrotation = 0;
+	}
+	
+	/// <summary>
+	/// Inner helper function to hide the pie.
+	/// </summary>
+	void StopIt () {
+			showThePie = false;
+			Increase = false;
+			if (useSlowMotion) Time.timeScale = 1f;
+	}
+
+	/// <summary>
+	/// Function to clamp the angle, preventing it to get out from the given interval.
+	/// </summary>
+	float ClampAngle (float angle, float min, float max) {
+		angle = NormalizeAngle(angle);
+		min = NormalizeAngle(min);
+		max = NormalizeAngle(max);
+		if (min < max) return Mathf.Clamp (angle, min, max);
+		else if (min == max) return max;
+		else {
+			if (angle > min - 90f) return Mathf.Clamp (angle, min, 360);
+			else return Mathf.Clamp (angle, 0, max);
+		}
+	}
+
+	/// <summary>
+	/// Function to convert the angle to a more human readable value between 0 and 360.
+	/// </summary>
+	float NormalizeAngle (float angle) {
+		if (angle < 0)
+			angle += 360;
+		if (angle > 360)
+			angle -= 360;
+		return angle;
+	}
+
+
+	/// <summary>
+	/// Put this function inside the OnGUI function to run the Pie Menu wrapper.
+	/// </summary>
+	public void Run () {
+
+		if (transition && currentRadius < 0) {
+			Options = transitionContent;
+			InitPie();
+			transition = false;
+		}
+
+		if (showThePie){
+			if ((Increase)&&(currentRadius < Radius)) {
+				currentRadius = Mathf.Lerp(currentRadius, Radius, 0.1f);
+			}
+
+			DrawPie();
+		}
+		
+		if (!(Increase) && (currentRadius > 0)) {
+			currentRadius = Mathf.Lerp(currentRadius, -10f, 0.1f);
+			DrawPie();
+		}
+		else if (!Increase) currentRadius = 0;
+		
+	}
+
+	/// <summary>
+	/// Here happens the magic.
+	/// </summary>
+	void DrawPie () {
+		float X = 0, Y = 0;
+		float itemradrot = 0;
+
+		if ( !frozen && (( Mathf.Abs(Input.GetAxis(XAxis)) > Treshold ) || ( Mathf.Abs(Input.GetAxis(YAxis)) > Treshold )) ) {
+			//rotation = Mathf.Atan2(Input.GetAxis(XAxis)*5, Input.GetAxis(YAxis)*5) * Mathf.Rad2Deg;
+			rotation = Mathf.Atan2(Input.GetAxis(XAxis), Input.GetAxis(YAxis)) * Mathf.Rad2Deg;
+		}
+
+		if (SnapToOption) {
+			float oneOption = 0;
+			if (shape == Shape.Semi_Circle) oneOption = ((Mathf.PI)/ Options.Length) * Mathf.Rad2Deg;
+			else if (shape == Shape.Circle) oneOption = ((2 * Mathf.PI)/ Options.Length) * Mathf.Rad2Deg;
+
+			if (rotation <= 0) rotation += 360;
+
+			//Debug.Log(oneOption + " " + Mathf.Round(rotation / (oneOption + (RotationInDegrees * Mathf.Deg2Rad))) + " ");
+
+			prevrotation = (Mathf.Round(rotation / oneOption) * oneOption) + (RotationInDegrees * Mathf.Deg2Rad);
+			//prevrotation = Mathf.Round(rotation / (oneOption + (RotationInDegrees * Mathf.Deg2Rad))) * oneOption;
+			if (shape == Shape.Semi_Circle) prevrotation = ClampAngle(prevrotation, RotationInDegrees + 90, RotationInDegrees + 225);
+			//prevrotation = rotation = (Mathf.Round(rotation / oneOption) * oneOption);
+		}
+		else {
+			prevrotation = Mathf.LerpAngle(prevrotation,rotation, (Mathf.Abs(Input.GetAxis(XAxis)) + Mathf.Abs(Input.GetAxis(YAxis))) * Sensitivity);
+			if (prevrotation >= 360) prevrotation -= 360;
+			else if (prevrotation <= -360) prevrotation += 360;
+			if (shape == Shape.Semi_Circle) prevrotation = ClampAngle(prevrotation, RotationInDegrees + 90, RotationInDegrees + 225);
+		}
+
+
+		if (BackgroundImage != null)
+		{
+			GUI.DrawTexture( new Rect(Center.x - currentRadius*BackgroundImageSizeMultiplier*0.5f*BackgroundImage.width*0.01f, Center.y - currentRadius*BackgroundImageSizeMultiplier*0.5f*BackgroundImage.height*0.01f, currentRadius*BackgroundImageSizeMultiplier*BackgroundImage.width*0.01f, currentRadius*BackgroundImageSizeMultiplier*BackgroundImage.height*0.01f), BackgroundImage );
+		}
+
+		if (CenterImage != null)
+		{
+			GUIBuffer = GUI.matrix;
+			GUIUtility.RotateAroundPivot(prevrotation , Center);
+			GUI.color = CenterImageTint;
+			GUI.DrawTexture(new Rect(Center.x - currentRadius*CenterImage.width*0.5f*CenterImageSizeMultiplier*0.01f, Center.y - currentRadius*CenterImage.height*0.5f*CenterImageSizeMultiplier*0.01f, currentRadius*CenterImage.width*CenterImageSizeMultiplier*0.01f, currentRadius*CenterImage.height*CenterImageSizeMultiplier*0.01f), CenterImage);
+			GUI.color = Color.white;
+			GUI.matrix = GUIBuffer;
+		}
+
+		if (Skin == null) Skin = ScriptableObject.CreateInstance<GUISkin>();
+
+		GUIStyle normal = Skin.FindStyle(StyleNameForNormal);
+		GUIStyle pressed = Skin.FindStyle(StyleNameForSelected);
+		GUIStyle final;
+
+		if (normal == null || pressed == null) {
+			Debug.LogError("Pie Menu Error: The Style names are not valid.");
+			normal = new GUIStyle ();
+			pressed = new GUIStyle ();
+		}
+
+		if (currentRadius > OptionsStandardSize || Radius <= OptionsStandardSize) {
+			for (int i=0; i < Options.Length; i++)
+			{
+				final = normal;
+				
+				if (shape == Shape.Semi_Circle) itemradrot = (((Mathf.PI)/ Options.Length) * i) + (RotationInDegrees * Mathf.Deg2Rad);
+				else if (shape == Shape.Circle) itemradrot = (((2 * Mathf.PI)/ Options.Length) * i) + (RotationInDegrees * Mathf.Deg2Rad);
+				
+				X = (currentRadius * Mathf.Cos(itemradrot) + Center.x );
+				Y = (currentRadius * Mathf.Sin(itemradrot) + Center.y );
+				
+				if	(isNearDegree((shape == Shape.Circle) ? 360 : 180 ,prevrotation,(itemradrot * Mathf.Rad2Deg)+90,Options.Length)) {
+					if (selectnum != i && currentRadius >= Radius/2) changed = true;
+					selectnum = i;
+					GUI.color = SelectedOptionTint;
+					final = pressed;
+				}
+				
+				if (frozen) GUI.color = Color.gray;
+
+				//Rect act = new Rect(X - ((items[i].Length * 5 + 50)/2), Y - 25, items[i].Length * 5 + 50, 50);
+				Rect act = new Rect(X - ((Options[i].text.Length * TextWidthMultiplier + OptionsStandardSize)*0.5f),
+				                    Y - OptionsStandardSize*0.5f,
+				                    Options[i].text.Length * TextWidthMultiplier + OptionsStandardSize,
+				                    OptionsStandardSize);
+				
+				GUI.Box( act, Options[i], final);
+				
+				GUI.color = Color.white;
+			}
+		}
+	}
+
+}
