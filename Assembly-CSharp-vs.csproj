@@ -49,11 +49,22 @@
      <Compile Include="Assets\Classes\DatabaseController.cs" />
      <Compile Include="Assets\Classes\DefensePlayer.cs" />
      <Compile Include="Assets\Classes\GameController.cs" />
+     <Compile Include="Assets\Classes\MainThreadHandler.cs" />
      <Compile Include="Assets\Classes\OffencePlayer.cs" />
      <Compile Include="Assets\Classes\Play.cs" />
-     <Compile Include="Assets\Classes\Player.cs" />
      <Compile Include="Assets\Classes\PlayerToken.cs" />
      <Compile Include="Assets\Classes\Responsibility.cs" />
+     <Compile Include="Assets\Pie Menu\PieMenu.cs" />
+     <Compile Include="Assets\Pie Menu\TemplateScripts\AdvancedPie.cs" />
+     <Compile Include="Assets\Pie Menu\TemplateScripts\BasicPie.cs" />
+     <Compile Include="Assets\Pie Menu\TemplateScripts\ColorMixer.cs" />
+     <Compile Include="Assets\Pie Menu\TemplateScripts\Menu.cs" />
+     <Compile Include="Assets\Pie Menu\TemplateScripts\MultitouchPie.cs" />
+     <Compile Include="Assets\Pie Menu\TemplateScripts\SendMessagePie.cs" />
+     <Compile Include="Assets\Pie Menu\TemplateScripts\SomeMethodToExecute.cs" />
+     <Compile Include="Assets\Pie Menu\TemplateScripts\TemplateForClickableAreas.cs" />
+     <Compile Include="Assets\Pie Menu\TemplateScripts\TemplateForUsingWithImages.cs" />
+     <Compile Include="Assets\Pie Menu\TemplateScripts\TemplateForUsingWithTexts.cs" />
      <Compile Include="Assets\test-scripts\test1.cs" />
      <None Include="Assets\Standard Assets\Projectors\Guidelines.txt" />
      <None Include="Assets\Standard Assets (Mobile)\Shaders\Particle Shaders\Mobile Multiply Culled.shader" />
@@ -62,6 +73,7 @@
      <None Include="Assets\Standard Assets (Mobile)\Shaders\Vertex Colored Shaders\Mobile Transparent Vertex Color.shader" />
      <None Include="Assets\Standard Assets (Mobile)\Shaders\Miscellaneous Shaders\Mobile Detail.shader" />
      <None Include="Assets\Standard Assets\Particles\Sources\Shaders\Particle Alpha Blend (Queue +100).shader" />
+     <None Include="Assets\Pie Menu\Skins\BuildPie\Icons\Build Icon Set.txt" />
      <None Include="Assets\Standard Assets\Projectors\Sources\Shaders\Projector Light.shader" />
      <None Include="Assets\Standard Assets (Mobile)\Shaders\Lightmap Shaders (Legacy)\Mobile Lightmap Reflective.shader" />
      <None Include="Assets\Standard Assets (Mobile)\Shaders\Particle Shaders\Mobile Particles Additive Culled.shader" />
@@ -69,6 +81,8 @@
      <None Include="Assets\Standard Assets (Mobile)\Shaders\Lightmap Shaders (Legacy)\Mobile Lightmap Only.shader" />
      <None Include="Assets\Standard Assets (Mobile)\Shaders\Lightmap Shaders (Legacy)\Mobile Lightmap AlphaTest.shader" />
      <None Include="Assets\Parse.Unity.xml" />
+     <None Include="Assets\Pie Menu\Skins\MetroPie\Icons\Metro Icon Set.txt" />
+     <None Include="Assets\Pie Menu\PieMenu (Legacy v1.0).txt" />
  <Reference Include="Assembly-UnityScript-firstpass">
  <HintPath>C:/Users/Matt/Documents/GitHub/cis454-football/Library/ScriptAssemblies/Assembly-UnityScript-firstpass.dll</HintPath>
  </Reference>
@@ -77,9 +91,6 @@
  </Reference>
  <Reference Include="Parse.Unity">
  <HintPath>C:/Users/Matt/Documents/GitHub/cis454-football/Assets/Parse.Unity.dll</HintPath>
- </Reference>
- <Reference Include="CBHelper-Unity">
- <HintPath>C:/Users/Matt/Documents/GitHub/cis454-football/Assets/Plugins/CBHelper-Unity.dll</HintPath>
  </Reference>
   </ItemGroup>
   <ItemGroup>

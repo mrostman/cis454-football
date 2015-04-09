@@ -6,11 +6,20 @@ using System.Threading.Tasks;
 
 public class DatabaseController : MonoBehaviour {
 	ParseObject retrieved;
-	IEnumerable<ParseObject> playQueryResults, historyQueryResults, srsQueryResults;
+	public GameObject tokenB;
+	public PlayerToken token;
+	public static GameObject tokenBase;
+	IEnumerable<ParseObject> playQueryResults, playerQueryResults, historyQueryResults, srsQueryResults;
 
 	// Use this for initialization
+	void Awake() {
+		tokenBase = this.tokenB;
+	}
+	
 	void Start () {
+		token = tokenBase.GetComponent<PlayerToken>();
 		GetPlays ();
+		
 	}
 
 	void GetPlays () 
@@ -18,6 +27,7 @@ public class DatabaseController : MonoBehaviour {
 		ParseUser.LogInAsync("kris", "password").ContinueWith(t =>
 		{	
 			ParseQuery<ParseObject> playQuery = ParseObject.GetQuery("Play");
+			ParseQuery<ParseObject> playerQuery = ParseObject.GetQuery ("Player");
 			ParseQuery<ParseObject> historyQuery = ParseObject.GetQuery("History")
 				.WhereEqualTo("User",ParseUser.CurrentUser);
 			ParseQuery<ParseObject> srsQuery = ParseObject.GetQuery("SRSData")
@@ -25,7 +35,8 @@ public class DatabaseController : MonoBehaviour {
 			
 			List<Task> tasks = new List<Task>();
 			
-			
+			Task playerTask = playerQuery.FindAsync().ContinueWith (u => { playerQueryResults = u.Result;});
+			tasks.Add (playerTask);
 			Task playTask = playQuery.FindAsync().ContinueWith(u => { playQueryResults = u.Result;});
 			tasks.Add (playTask);
 			Task historyTask = historyQuery.FindAsync().ContinueWith(u => { historyQueryResults = u.Result ;});
@@ -39,10 +50,18 @@ public class DatabaseController : MonoBehaviour {
 				Debug.Log ("Checking...");
 				Debug.Log (playTask.IsCompleted);
 				//Debug.Log ("ID: " + re.ObjectId);
-				foreach(ParseObject i in srsQueryResults)
+				int i = 0;
+				foreach(ParseObject n in playerQueryResults)
 				{
-					Debug.Log (i.ObjectId);
-					float s1 = i.Get<float>("BX1Mjat6KY");
+					if (i++ < 5)
+					{
+						token.Initialize(n);
+					}	
+				}
+				foreach(ParseObject pl in srsQueryResults)
+				{
+					Debug.Log (pl.ObjectId);
+					float s1 = pl.Get<float>("BX1Mjat6KY");
 					//bool exists = i.TryGetValue<string>("User", out s1);
 					Debug.Log (s1);
 					//Debug.Log (exists);

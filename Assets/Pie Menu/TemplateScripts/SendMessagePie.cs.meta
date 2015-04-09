@@ -1,0 +1,31 @@
+fileFormatVersion: 2
+guid: ff6fce8da7a7e7f41b50dcfe8993f0c0
+labels:
+- Script
+- Template
+- Advanced
+- Array
+- Circle
+- Circular
+- Gui
+- Menu
+- Pi
+- Pie
+- Rotation
+- Transition
+- Axis
+- UGUI
+- Ngui
+- Ui
+- Cursor
+- Documentation
+- Unity
+- Method
+- Execute
+- Basic
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 

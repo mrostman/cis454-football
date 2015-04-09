@@ -17,7 +17,7 @@ public class Responsibility : MonoBehaviour {
 	}
 	
 	// Override the default Equals method to compare responsibilities based on ID alone (increases performance and prevents false negatives)
-	public override bool Equals(System.Object obj)
+	public bool IsMatch(System.Object obj)
 	{
 		// If parameter is null return false.
 		if (obj == null)

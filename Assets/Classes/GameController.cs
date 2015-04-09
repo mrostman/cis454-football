@@ -1,7 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class GameController : MonoBehaviour {
+	// Player Tokens
+	public List<GameObject> offensiveTeam;
+	public List<GameObject> defensiveTeam;
+
 
 	Play[] allPlays;
 	Play currentPlay;
