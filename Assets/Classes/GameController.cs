@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 public class GameController : MonoBehaviour {
 	// Player Tokens
-	public List<GameObject> offensiveTeam;
-	public List<GameObject> defensiveTeam;
+	public List<PlayerToken> offensiveTeam;
+	public List<PlayerToken> defensiveTeam;
 
 
 	Play[] allPlays;

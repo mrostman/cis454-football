@@ -50,6 +50,7 @@
      <Compile Include="Assets\Classes\DefensePlayer.cs" />
      <Compile Include="Assets\Classes\GameController.cs" />
      <Compile Include="Assets\Classes\MainThreadHandler.cs" />
+     <Compile Include="Assets\Classes\MenuController.cs" />
      <Compile Include="Assets\Classes\OffencePlayer.cs" />
      <Compile Include="Assets\Classes\Play.cs" />
      <Compile Include="Assets\Classes\PlayerToken.cs" />

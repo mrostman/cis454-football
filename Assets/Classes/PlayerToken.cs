@@ -249,7 +249,7 @@ public class PlayerToken : MonoBehaviour {
 	
 	void showMenuInitialized() {
 		if (menuSpawnTime++ == 0)
-			menu.InitPie(menuContentInitialized);
+			menu.InitPie(MenuController.menuContentInitialized.ToArray());
 		else if (menuSpawnTime++ < 20)
 			return;
 		else if (Input.GetMouseButtonDown(0)){
@@ -283,7 +283,7 @@ public class PlayerToken : MonoBehaviour {
 	void showMenuShifted(){
 		Debug.Log ("ShowMenuShifted");
 		if (menuSpawnTime++ == 0)
-			menu.InitPie(menuContentShifted);
+			menu.InitPie(MenuController.menuContentShifted.ToArray());
 		else if (menuSpawnTime++ < 20)
 			return;
 		else if (Input.GetMouseButtonDown(0)){
@@ -322,7 +322,7 @@ public class PlayerToken : MonoBehaviour {
 	void showMenuMotioned(){
 		Debug.Log ("ShowMenuMotioned");
 		if (menuSpawnTime++ == 0)
-			menu.InitPie(menuContentMotioned);
+			menu.InitPie(MenuController.menuContentMotioned.ToArray());
 		else if (menuSpawnTime++ < 20)
 			return;
 		else if (Input.GetMouseButtonDown(0)){

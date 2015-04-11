@@ -14,6 +14,7 @@ public class DatabaseController : MonoBehaviour {
 	List<ParseObject> dTeamQueryResults = new List<ParseObject> ();
 	List<ParseObject> playerQueryResults = new List<ParseObject> ();
 	List<ParseObject> responsibilityQueryResults = new List<ParseObject> ();
+	public GameController gameController;
 
 	// Use this for initialization
 	void Start () {
@@ -345,6 +346,20 @@ public class DatabaseController : MonoBehaviour {
 
 				//Debug.Log (m.Get<ParseObject>("Responsib").ObjectId);
 			}
+		}
+		
+		initializeTeamsTEST();
+	}
+	
+	// TODO: Remove this function! (For testing only
+	void initializeTeamsTEST(){
+	ParseObject play = playQueryResults[0];
+	ParseObject oTeam = play.Get<ParseObject>("OffensiveTeam");
+	ParseObject dTeam = play.Get<ParseObject>("DefensiveTeam");
+		for( int i = 0; i < 11; i++)
+		{
+			gameController.offensiveTeam[i].Initialize(oTeam.Get<ParseObject>("Player" + i));
+			gameController.defensiveTeam[i].Initialize(dTeam.Get<ParseObject>("Player" + i));
 		}
 	}
 
