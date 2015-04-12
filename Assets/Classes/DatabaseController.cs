@@ -5,15 +5,17 @@ using Parse;
 using System.Threading.Tasks;
 
 public class DatabaseController : MonoBehaviour {
-	ParseObject retrieved;
+	public bool databaseLoaded;
 	float srsDefaultValue = 1;
+	float recencyDelayFactor = 1;
 	List<ParseObject> playQueryResults = new List<ParseObject> ();
 	List<ParseObject> historyQueryResults = new List<ParseObject> ();
 	List<ParseObject> srsQueryResults = new List<ParseObject> ();
 	List<ParseObject> oTeamQueryResults = new List<ParseObject> ();
 	List<ParseObject> dTeamQueryResults = new List<ParseObject> ();
 	List<ParseObject> playerQueryResults = new List<ParseObject> ();
-	List<ParseObject> responsibilityQueryResults = new List<ParseObject> ();
+	public static List<ParseObject> responsibilityQueryResults = new List<ParseObject> ();
+	public GameController gameController;
 
 	// Use this for initialization
 	void Start () {
@@ -346,35 +348,106 @@ public class DatabaseController : MonoBehaviour {
 				//Debug.Log (m.Get<ParseObject>("Responsib").ObjectId);
 			}
 		}
+
+		databaseLoaded = true;
+		initializeTeamsTEST();
+	}
+
+	// TODO: Remove this function! (For testing only
+	void initializeTeamsTEST(){
+		ParseObject play = playQueryResults[0];
+		ParseObject oTeam = play.Get<ParseObject>("OffensiveTeam");
+		ParseObject dTeam = play.Get<ParseObject>("DefensiveTeam");
+		for( int i = 0; i < 11; i++)
+		{
+			gameController.offensiveTeam[i].Initialize(oTeam.Get<ParseObject>("Player" + i));
+			gameController.defensiveTeam[i].Initialize(dTeam.Get<ParseObject>("Player" + i));
+		}
 	}
 
 	// TODO: implement once Play class structure is decided
-	bool UpdatePlay (Play inputPlay)
+	public bool UpdatePlay (ParseObject playHistory)
 	{
-		return true;
+		Task saveTask = playHistory.SaveAsync();
+
+		if (saveTask.IsCompleted) 
+		{
+			return true;
+		} 
+		else 
+		{
+			return false;
+		}
 	}
 
-	float CalculateSRSTotal ()
+	public ParseObject SelectPlay () 
 	{
-		float srsTotal = 0;
-		int loopcounter = 0;
+		float coefficientTotal = CalculateSRSTotal();
+		float selectionValue = Random.value*coefficientTotal;
+		float runningSrsSum = 0;
+		ParseObject selectedPlay = null;
 
-		foreach (ParseObject m in playQueryResults) 
+		foreach (ParseObject play in playQueryResults) 
 		{
-			float srsReference;
-
+			float srsValue;
+			
 			if (srsQueryResults.Count == 1)
 			{
 				ParseObject srsRow = srsQueryResults[0];
-				bool result = srsRow.TryGetValue(m.ObjectId.ToString (), out srsReference);
+				bool result = srsRow.TryGetValue(play.ObjectId.ToString (), out srsValue);
 				//Debug.Log ("play object ID: " + m.ObjectId);
 				//Debug.Log ("result: " + result);
 				if (!result)
 				{
-					srsReference = srsDefaultValue;
-					srsRow[m.ObjectId] = srsReference;
+					srsValue = srsDefaultValue;
+					srsRow[play.ObjectId] = srsValue;
 				}
-				srsTotal = srsTotal + srsReference;
+				runningSrsSum = runningSrsSum + srsValue;
+			}
+			else
+			{
+				Debug.Log ("more than one set of srs coefficients for current user: ");
+			}
+
+			bool recentlySeen = TooRecentlySeen(play);
+			if (recentlySeen)
+			{
+				selectedPlay = SelectPlay();
+			}
+			else
+			{
+				selectedPlay = play;
+			}
+		}
+
+		if (selectedPlay == null) 
+		{
+			Debug.Log ("selectplay return value is null; the system failed to select a play.");
+		}
+
+		return selectedPlay;
+	}
+
+	private float CalculateSRSTotal ()
+	{
+		float srsTotal = 0;
+
+		foreach (ParseObject play in playQueryResults) 
+		{
+			float srsValue;
+
+			if (srsQueryResults.Count == 1)
+			{
+				ParseObject srsRow = srsQueryResults[0];
+				bool result = srsRow.TryGetValue(play.ObjectId.ToString (), out srsValue);
+				//Debug.Log ("play object ID: " + m.ObjectId);
+				//Debug.Log ("result: " + result);
+				if (!result)
+				{
+					srsValue = srsDefaultValue;
+					srsRow[play.ObjectId] = srsValue;
+				}
+				srsTotal = srsTotal + srsValue;
 			}
 			else
 			{
@@ -385,6 +458,35 @@ public class DatabaseController : MonoBehaviour {
 		//Debug.Log ("srs total: ");
 		//Debug.Log (srsTotal);
 		return srsTotal;
+	}
+
+	bool TooRecentlySeen(ParseObject play)
+	{
+		System.DateTime mostRecent = System.DateTime.MinValue;
+		foreach (ParseObject pastPlay in historyQueryResults) 
+		{
+			string pastPlayID;
+			bool result = pastPlay.TryGetValue("Play", out pastPlayID);
+			if (result){
+				if (play.ObjectId == pastPlayID)
+				{
+					Debug.Log ("play id: " + play.ObjectId);
+					System.DateTime updatedAt = (System.DateTime)pastPlay.UpdatedAt;
+					if (updatedAt > mostRecent) 
+					{
+						mostRecent = updatedAt;
+					}
+					System.DateTime difference = System.DateTime.Now - System.TimeSpan.FromDays(1*recencyDelayFactor);
+					Debug.Log ("One day ago: " + difference.ToString());
+					if (updatedAt > System.DateTime.Now - System.TimeSpan.FromDays(1*recencyDelayFactor))
+					{
+						return true;
+					}
+				}
+			}
+		}
+		gameController.playLastSeen = mostRecent;
+		return false;
 	}
 
 	// Update is called once per frame

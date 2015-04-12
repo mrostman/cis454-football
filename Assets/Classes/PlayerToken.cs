@@ -36,7 +36,7 @@ public class PlayerToken : MonoBehaviour {
 	private static int huddleIndex;		// Locations to put 
 	
 	// Game variables (set only at initialization
-	private bool controllable;			// Is the token controllable by the player
+	public bool controllable;			// Is the token controllable by the player
 
 	private string abbreviation;		// Abbreviation for the player's position
 	private string position;			// Name of the player's position
@@ -159,7 +159,7 @@ public class PlayerToken : MonoBehaviour {
 		state = STATE.UNINITIALIZED;
 	}
 	
-	private static void newPlay() {
+	public static void newPlay() {
 		huddleIndex = 0;
 	}
 	
