@@ -13,8 +13,9 @@ public class DatabaseController : MonoBehaviour {
 	List<ParseObject> oTeamQueryResults = new List<ParseObject> ();
 	List<ParseObject> dTeamQueryResults = new List<ParseObject> ();
 	List<ParseObject> playerQueryResults = new List<ParseObject> ();
-	List<ParseObject> responsibilityQueryResults = new List<ParseObject> ();
+	public static List<ParseObject> responsibilityQueryResults = new List<ParseObject> ();
 	public GameController gameController;
+	public static bool databaseLoaded = false;
 
 	// Use this for initialization
 	void Start () {
@@ -348,6 +349,7 @@ public class DatabaseController : MonoBehaviour {
 			}
 		}
 		
+		databaseLoaded = true;
 		initializeTeamsTEST();
 	}
 	
