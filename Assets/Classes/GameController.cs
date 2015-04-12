@@ -114,6 +114,12 @@ public class GameController : MonoBehaviour {
 			ParseObject inputResponsibility;
 			ParseObject correctResponsibility;
 
+			// if the player is an offensive lineman (which take no user input), it cannot be incorrect
+			if (oPlayer.controllable == false)
+			{
+				return 1;
+			}
+
 			// check correctness of location
 			bool inputLocationResult = inputParsePlayer.TryGetValue("Location", out inputLocation);
 			// Location should always be set, so if no location is found output a debug message
@@ -125,6 +131,7 @@ public class GameController : MonoBehaviour {
 				{
 					Debug.Log ("error in correctness evaluation, no location input for player " + position);
 				}
+				return 0;
 			}
 
 			bool correctLocationResult = correctParsePlayer.TryGetValue("Location", out correctLocation);
@@ -137,10 +144,11 @@ public class GameController : MonoBehaviour {
 				{
 					Debug.Log ("error in correctness evaluation, no correct location for player " + position);
 				}
+				return 0;
 			}
 
-			float locationDistance = Vector3.Distance (inputLocation, correctLocation);
-			if (locationDistance > distanceCorrectnessThreshold)
+			bool wrongLocation = CheckTooFar(inputLocation, correctLocation);
+			if (wrongLocation)
 			{
 				return 0;
 			}
@@ -150,19 +158,24 @@ public class GameController : MonoBehaviour {
 			bool correctMotionResult = correctParsePlayer.TryGetValue("Motion", out correctMotion);
 
 			// if one of the two has a motion set and the other doesn't, return incorrect
-			if (inputMotionResult ^ correctMotionResult)
+			if (!inputMotionResult || !correctMotionResult)
 			{
+				string position;
+				bool nameResult = inputParsePlayer.TryGetValue("Position", out position);
+				if (nameResult)
+				{
+					Debug.Log ("error in correctness evaluation, null motion for player: " + position);
+				}
 				return 0;
 			}
 
 			// if both have a motion, check how far apart they are and return incorrect if it exceeds the threshold
-			if (inputMotionResult && correctMotionResult)
+
+
+			bool wrongMotion = CheckTooFar (inputMotion, correctMotion);
+			if (wrongMotion)
 			{
-				float motionDistance = Vector2.Distance (inputMotion, correctMotion);
-				if (motionDistance > distanceCorrectnessThreshold)
-				{
-					return 0;
-				}
+				return 0;
 			}
 
 			// check correctness of shifts
@@ -170,25 +183,29 @@ public class GameController : MonoBehaviour {
 			bool correctShiftResult = correctParsePlayer.TryGetValue("Shifts", out correctShifts);
 
 			// if one of the two has a shift set and the other doesn't, return incorrect
-			if (inputShiftResult ^ correctShiftResult)
+			if (!inputShiftResult || !correctShiftResult)
+			{
+				string position;
+				bool nameResult = inputParsePlayer.TryGetValue("Position", out position);
+				if (nameResult)
+				{
+					Debug.Log ("error in correctness evaluation, null shift for player: " + position);
+				}
+				return 0;
+			}
+
+
+			if(inputShifts.Count != correctShifts.Count)
 			{
 				return 0;
 			}
 
-			if (inputShiftResult && correctShiftResult)
+			for(int i=0;i<inputShifts.Count;i++)
 			{
-				if(inputShifts.Count != correctShifts.Count)
+				bool wrongShift = CheckTooFar(inputShifts[i],correctShifts[i]);
+				if (wrongShift)
 				{
 					return 0;
-				}
-
-				for(int i=0;i<inputShifts.Count;i++)
-				{
-					float shiftDistance = Vector2.Distance (inputShifts[i],correctShifts[i]);
-					if (shiftDistance > distanceCorrectnessThreshold)
-					{
-						return 0;
-					}
 				}
 			}
 
@@ -211,7 +228,34 @@ public class GameController : MonoBehaviour {
 		}
 		return 1;
 	}
-	
+
+	bool CheckTooFar(Vector2 correct, Vector2 input)
+	{
+		if (correct == Vector2.zero && input !=Vector2.zero) 
+		{
+			return false;
+		}
+		
+		float distance = Vector2.Distance (correct, input);
+		if (distance > distanceCorrectnessThreshold)
+		{
+			return false;
+		}
+		
+		return true;
+	}
+
+	bool CheckTooFar(Vector3 correct, Vector3 input)
+	{
+		float distance = Vector3.Distance (correct, input);
+		if (distance > distanceCorrectnessThreshold)
+		{
+			return false;
+		}
+		
+		return true;
+	}
+
 	float SRSRecalculate (int correctness, System.DateTime sinceLastPlayed) {
 		// TODO: SRS coefficient product of age component, progress component, effort component
 		// Age A(x) = Cn^x			(x is time elapsed, C is initial constant)
