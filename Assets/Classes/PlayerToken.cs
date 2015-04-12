@@ -18,17 +18,19 @@ public class PlayerToken : MonoBehaviour {
 	private static float heightFactor; 	// Tracking size of screen
 	private int doubleClickCount = 0;	// Doubleclick handling
 	public bool popMenu = false; 		// Flag indicating the menu has been requested (via doubleclick)
+	private bool responsibilityMenu = false;
 	public PieMenu menu;
 	public GUIContent[] menuContentInitialized;
 	public GUIContent[] menuContentShifted;
 	public GUIContent[] menuContentMotioned;
 	public GUIContent[] menuContentResponsibility;
-	public Vector2 menuTarget;
-	public int menuSpawnTime;			// Counter to prevent clicks being immediately registered on menu
+	private Vector2 menuTarget;
+	private int menuSpawnTime;			// Counter to prevent clicks being immediately registered on menu
+	private int menuPage = 0;
 	
 	// Grid variables
-	private readonly int maxX = 10;  	// Horizontal grid size
-	private readonly int maxY = -9;		// Vertacle grid size	
+	private const int maxX = 10;  	// Horizontal grid size
+	private const int maxY = -9;		// Vertacle grid size	
 	private Vector3 target;				// Snap to grid - point to snap to
 	private Vector3 startPoint; 		// Snap to grid - point the token is snapping from
 	private bool snapping;				// Is the token in the process of snapping to a position?
@@ -37,7 +39,6 @@ public class PlayerToken : MonoBehaviour {
 	
 	// Game variables (set only at initialization
 	public bool controllable;			// Is the token controllable by the player
-
 	private string abbreviation;		// Abbreviation for the player's position
 	private string position;			// Name of the player's position
 	
@@ -46,12 +47,14 @@ public class PlayerToken : MonoBehaviour {
 	private Vector2 correctMotion;		// Assigned motion
 	private List<Vector2> correctShifts;// Assigned shifts
 	private ParseObject correctResponsibility;// Assigned responsibility
+	private static int correctMaxShifts;// Highest number of assigned shifts among all players 
 	
 	// User input variables (The user's input)
 	private Vector3 location;			// Location of the token
 	private Vector2 motion;				// Input motion
 	private List<Vector2> shifts;		// Input shifts
 	private ParseObject responsibility;	// Input responsibility
+	private static int maxShifts;		// Highest number of input shifts among all players
 
 	// Display text
 	public TextMesh displayText;		// Text to be displayed over player model (abbreviation usually)
@@ -63,7 +66,20 @@ public class PlayerToken : MonoBehaviour {
 	
 	// Player Model
 	public GameObject bigGuy;
+	public GameObject bigGuyModel;
 	public Animator bigGuyAnimator;
+	public Material defaultMaterial;
+	public Material ghostMaterial;
+	private bool running = false;
+	private static Vector3 runningOffset = new Vector3(0,-0.6f,0);
+	private Vector3 facing = Vector3.zero;
+	
+	// Animation Variables
+	private const float shiftTime = 2f;
+	private const float idleTime = 0.5f;
+	private const float motionTime = 2f;
+	private const float responsibilityTime = 2f;
+	private const float turnTime = 0.5f;
 	
 	// Initialization parseObject
 	private ParseObject parsePlayer;
@@ -71,15 +87,10 @@ public class PlayerToken : MonoBehaviour {
 	// Initialization functions
 	public void Initialize(ParseObject iParsePlayer)
 	{
-		Debug.Log("Initialization Requested");
 		parsePlayer = iParsePlayer;
 	}
 	private void InitializeThreadsafe()
 	{
-		Debug.Log("Initializing");
-		// TODO: Figure out animations
-		//bigGuyAnimator.animation.Stop ();
-		Debug.Log(Parse.ParseUser.CurrentUser.Get<string>("username"));
 		// Set initialized to avoid re-initialization
 		state = STATE.INITIALIZED;
 		
@@ -109,7 +120,7 @@ public class PlayerToken : MonoBehaviour {
 		if (!parsePlayer.TryGetValue("Controllable", 	out controllable)) 	{ controllable = false; }
 		if (!parsePlayer.TryGetValue("Abbreviation", 	out abbreviation)) 	{ abbreviation = ""; }
 		if (!parsePlayer.TryGetValue("Position"    , 	out position    )) 	{ position = ""; }
-		if (!parsePlayer.TryGetValue("Responsibility", 	out correctResponsibility)){ correctResponsibility = null; }
+		if (!parsePlayer.TryGetValue("Responsib", 	out correctResponsibility)){ Debug.Log ("NULLRESP" + abbreviation); correctResponsibility = null; }
 		
 		// Set token to display abbreviation
 		displayText.text = abbreviation;
@@ -120,6 +131,7 @@ public class PlayerToken : MonoBehaviour {
 			motion = correctMotion;
 			shifts = correctShifts;
 			responsibility = correctResponsibility;
+			correctMaxShifts = System.Math.Max(correctMaxShifts, shifts.Count);
 		}
 		// Otherwise set it to the 'blank' starting values.
 		else {
@@ -132,6 +144,8 @@ public class PlayerToken : MonoBehaviour {
 		
 		// Move the token to it's location
 		this.gameObject.transform.position = location;
+		
+		//bigGuyAnimator.playbackTime = Random.Range(0f, 100f);
 	}
 	public void deInitialize() {
 		// Set up the line renderers
@@ -159,12 +173,17 @@ public class PlayerToken : MonoBehaviour {
 		state = STATE.UNINITIALIZED;
 	}
 	
+	// Reset the huddleIndex for a new play
 	public static void newPlay() {
 		huddleIndex = 0;
 	}
 	
 	// Set various variables to default values to avoid unset variable issues
 	void Awake () {
+		// Set the animation to a random position, so players arn't perfectly in sync
+		bigGuyAnimator.Play ("Idle", -1, Random.Range (0f,2f));
+		running = false;
+		
 		// Set various default values
 		deInitialize();
 		
@@ -188,11 +207,8 @@ public class PlayerToken : MonoBehaviour {
 			huddle.Add (new Vector3( 0, -9, -1));
 		}
 	}
-	
-	void Start () {
-	
-	}
-	
+
+	// Unity function for GUI updates, used to reposition pie menu
 	void OnGUI () {
 		menu.Center = menuTarget;	//Set the center point of the pie menu in every GUI draw.
 		menu.Run();					//This is the function, which will draw the pie on the GUI if it's Active. You can place it anywhere in the OnGUI function.
@@ -207,28 +223,34 @@ public class PlayerToken : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		// Compensate for animation drift
+		bigGuy.transform.localPosition = Vector3.zero;
+		
 		// Menu handling
 		if (popMenu)
 		{
-			Debug.Log ("ShowMenu " + state);
-			switch (state) {
-				case STATE.INITIALIZED:
-					showMenuInitialized();
-					break;
-				case STATE.SHIFTED:
-					showMenuShifted();
-					break;
-				case STATE.MOTIONED:
-					showMenuMotioned();
-					break;
-				default:
-					Debug.LogError("Attempt to open menu in invalid state: " + state);
-					popMenu = false;
-					break;
-			}
+			if (responsibilityMenu)
+				showMenuResponsibility();
+			else
+				switch (state) {
+					case STATE.INITIALIZED:
+						showMenuInitialized();
+						break;
+					case STATE.SHIFTED:
+						showMenuShifted();
+						break;
+					case STATE.MOTIONED:
+					case STATE.RESPONSIBLE:
+						showMenuMotioned();
+						break;
+					default:
+						Debug.Log("Attempt to open menu in invalid state: " + state);
+						popMenu = false;
+						break;
+				}
 		}
 		
-		// Initialize the token if needed
+		// Initialize the token if it's ready for initialization
 		if (state == STATE.UNINITIALIZED && parsePlayer != null)
 			InitializeThreadsafe();
 	
@@ -249,7 +271,7 @@ public class PlayerToken : MonoBehaviour {
 	
 	void showMenuInitialized() {
 		if (menuSpawnTime++ == 0)
-			menu.InitPie(menuContentInitialized);
+			menu.InitPie(MenuController.menuContentInitialized.ToArray());
 		else if (menuSpawnTime++ < 20)
 			return;
 		else if (Input.GetMouseButtonDown(0)){
@@ -265,9 +287,10 @@ public class PlayerToken : MonoBehaviour {
 				popMenu = false;
 			}
 			else if (menu.Selected == 2) {
-				// TODO: Add menu for selecting responsibility
-				menu.Close ();
-				popMenu = false;
+				responsibilityMenu = true;
+				menuPage = 0;
+				menuSpawnTime = 1;
+				menu.TransitionPie(MenuController.menuContentResponsibility[menuPage].ToArray());
 			}
 			else if (menu.Selected == 3 && Input.GetMouseButtonDown(0)) {	// "Cancel" Selected
 				menu.Close();
@@ -281,9 +304,8 @@ public class PlayerToken : MonoBehaviour {
 	}
 
 	void showMenuShifted(){
-		Debug.Log ("ShowMenuShifted");
 		if (menuSpawnTime++ == 0)
-			menu.InitPie(menuContentShifted);
+			menu.InitPie(MenuController.menuContentShifted.ToArray());
 		else if (menuSpawnTime++ < 20)
 			return;
 		else if (Input.GetMouseButtonDown(0)){
@@ -301,9 +323,10 @@ public class PlayerToken : MonoBehaviour {
 					popMenu = false;
 					break;
 				case 2:
-					// TODO: Responsibilty selection menu
-					menu.Close ();
-					popMenu = false;
+					responsibilityMenu = true;
+					menuPage = 0;
+					menuSpawnTime = 1;
+					menu.TransitionPie(MenuController.menuContentResponsibility[menuPage].ToArray());
 					break;
 				case 3:
 					clearInput();
@@ -319,10 +342,10 @@ public class PlayerToken : MonoBehaviour {
 			}
 		}
 	}
+	
 	void showMenuMotioned(){
-		Debug.Log ("ShowMenuMotioned");
 		if (menuSpawnTime++ == 0)
-			menu.InitPie(menuContentMotioned);
+			menu.InitPie(MenuController.menuContentMotioned.ToArray());
 		else if (menuSpawnTime++ < 20)
 			return;
 		else if (Input.GetMouseButtonDown(0)){
@@ -330,9 +353,10 @@ public class PlayerToken : MonoBehaviour {
 			switch (menu.Selected)
 			{
 			case 0:
-				// TODO: Responsibilty selection menu
-				menu.Close ();
-				popMenu = false;
+				responsibilityMenu = true;
+				menuPage = 0;
+				menuSpawnTime = 1;
+				menu.TransitionPie(MenuController.menuContentResponsibility[menuPage].ToArray());
 				break;
 			case 1:
 				clearInput();
@@ -345,6 +369,36 @@ public class PlayerToken : MonoBehaviour {
 				break;
 			default:
 				break;
+			}
+		}
+	}
+	
+	void showMenuResponsibility() {
+		List<GUIContent> page = MenuController.menuContentResponsibility[menuPage];
+		if (menuSpawnTime++ == 0)
+			menu.TransitionPie(MenuController.menuContentResponsibility[menuPage].ToArray());
+		else if (menuSpawnTime++ < 20)
+			return;
+		else if (Input.GetMouseButtonDown(0)){
+			GUIContent selected = page[menu.Selected];
+			if (selected.tooltip.Equals("Back")) {
+				menu.TransitionPie(MenuController.menuContentResponsibility[--menuPage].ToArray ());
+				menuSpawnTime = 1;
+			}
+			else if (selected.tooltip.Equals("Next")) {
+				menu.TransitionPie(MenuController.menuContentResponsibility[++menuPage].ToArray ());
+				menuSpawnTime = 1;
+			}
+			else {
+				int index;
+				if (menuPage == 0) 
+					index = menu.Selected;
+				else
+					index = (7 + ( (menuPage - 1) * 6 ) + menu.Selected);
+				responsibility = DatabaseController.responsibilityQueryResults[index];
+				responsibilityMenu = false;
+				menu.Close ();
+				popMenu = false;
 			}
 		}
 	}
@@ -383,18 +437,21 @@ public class PlayerToken : MonoBehaviour {
 			state = STATE.SHIFTED;
 		if (!shiftsSet)
 			state = STATE.INITIALIZED;
+		responsibilityMenu = false;
+		running = false;
 	}
 
 	// Called when the mouse button is pushed
 	void OnMouseDown() { 
+		Debug.Log ("AnimTest");
+	
 		Debug.Log ("Mouse down in " + state + ", Menu " + popMenu);
-		// Check if this click is the second click of a doubleclick
+		// Check if this click is the second click of a doubleclick, if so, we call the menu
 		if (doubleClickCount > 0) {
 			menuTarget = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
 			Debug.Log ("DoubleClick");
 			menuSpawnTime = 0;
 			popMenu = true;
-			// TODO: Implement menu handling
 		}
 	
 		// Check for states in which we want to ignore mouse dragging
@@ -407,6 +464,7 @@ public class PlayerToken : MonoBehaviour {
 		// If not a double click, start dragging the player
 		else {
 			Debug.Log ("Drag");
+			
 			startPoint = new Vector3 (this.transform.position.x,
                          this.transform.position.y,
                          this.transform.position.z);
@@ -419,17 +477,27 @@ public class PlayerToken : MonoBehaviour {
 	void OnMouseDrag() {
 		if (!checkDraggable())
 			return;
-	
+			
+		Vector3 oldPos = transform.position;
 		// Move the token to it's new location, then reset the offset position to the new location
 		transform.Translate( (Input.mousePosition.x - offset.x) * heightFactor, (Input.mousePosition.y - offset.y) * heightFactor, 0);
+		
+		running = true;
+
+		// Reset the offset
 		offset.x = Input.mousePosition.x;
 		offset.y = Input.mousePosition.y;
 	}
 
 	// Called when the mouse button is released
 	void OnMouseUp() {
+		// If we weren't dragging (Because we were not able to do so), do nothing
 		if (!checkDraggable())
 			return;
+		running = false;
+		
+		// Handle animation drift
+		bigGuy.transform.localPosition = Vector3.zero;
 			
 		// Set snap position
 		target = new Vector3 (Mathf.Round (this.transform.position.x), Mathf.Round (this.transform.position.y), this.transform.position.z);
@@ -452,8 +520,8 @@ public class PlayerToken : MonoBehaviour {
 		}
 		
 		// If placement is valid, set snapping so update will move the token
-		snapping = true;
-		
+		this.gameObject.MoveTo (target,0.5f,0);
+
 		// Check to insure we actually moved (If not, THEN we set the doubleclick value)
 		if (target == startPoint) {
 			rollbackState();
@@ -482,10 +550,12 @@ public class PlayerToken : MonoBehaviour {
 		location = end;
 	}
 	
-	// Add an 
+	// Add a Shift
 	private void addShift(Vector3 start, Vector3 end){
+		// Add the shift to the list of shifts
 		shifts.Add(new Vector2(end.x - start.x, end.y - start.y));
 		shiftsSet = true;
+		maxShifts = System.Math.Max(maxShifts, shifts.Count);
 
 		// Add movement line
 		lines[lineIndex].SetColors(Color.red, Color.red);
@@ -496,9 +566,6 @@ public class PlayerToken : MonoBehaviour {
 		
 		// Set new state
 		state = STATE.SHIFTED;
-		
-		//bigGuyAnimator.StartPlayback();
-		bigGuyAnimator.Play("Running");
 	}
 	
 	// Set the assigned motion (called on mouseup after a drag in motioning state)
@@ -517,7 +584,7 @@ public class PlayerToken : MonoBehaviour {
 		state = STATE.MOTIONED;
 	}
 	
-	
+	// Return a parseobject of the Player containing the user input values
 	public ParseObject getInputParseObject(){
 		ParseObject playerOut = new ParseObject("Player");
 		
@@ -531,7 +598,327 @@ public class PlayerToken : MonoBehaviour {
 		return playerOut;
 	}
 	
+	// Return a parseobject of the Player containing the correct values (The original ParseObject used for initialization)
 	public ParseObject getCorrectParseObject() {
 		return parsePlayer;
+	}
+	
+	// Animate the input play
+	public void AnimateInputPlay() {
+		// Move to the start of the path
+		ClearTokenIncorrect ();
+		MoveToStart ();
+		
+		// Hide the input lines
+		linesShow (false);
+		
+		// Set up local variables
+		float delay = 0f;
+		GameObject token = this.gameObject;
+		Vector3 loc = location;
+		Vector3 prevLoc = loc;
+		
+		// Check for correct location
+		if (GameController.CheckTooFar(location, correctLocation))
+			SetTokenIncorrect();
+		
+		// Loop through and animate each shift 
+		int i = 0;
+		if (shifts != null)
+			for (i = 0; i < shifts.Count; i++){
+				// Set target for the shift
+				prevLoc = loc;
+				loc = loc + new Vector3 (shifts[i].x, shifts[i].y, 0);
+				
+				// Check correctness
+				if (GameController.CheckTooFar(shifts[i], correctShifts[i]))
+					Invoke ("SetTokenIncorrect", delay);
+				
+				// Set up the shift options
+				Hashtable shiftOptions = new Hashtable();
+				Hashtable lookOptions = new Hashtable();
+				shiftOptions.Add ("position", loc);
+				shiftOptions.Add ("time", shiftTime);
+				shiftOptions.Add ("delay", delay);
+				shiftOptions.Add ("easetype", iTween.EaseType.easeInOutQuad);
+				shiftOptions.Add ("onstart", "SetAnimationRun");
+				shiftOptions.Add ("oncomplete", "SetAnimationIdle");
+				lookOptions.Add ("rotation", Quaternion.LookRotation(new Vector3 (0,0,1), loc - prevLoc).eulerAngles);
+				lookOptions.Add ("time", turnTime);
+				lookOptions.Add ("delay", delay);
+				
+				// Animate the shift
+				iTween.MoveTo (token, shiftOptions);
+				iTween.RotateTo (token, lookOptions);
+				
+				// Stand idle during the delay between shifts
+				Hashtable idleOptions = new Hashtable();
+				idleOptions.Add ("y", 1f);
+				idleOptions.Add ("islocal", true);
+				idleOptions.Add ("time", idleTime);
+				idleOptions.Add ("delay", delay + shiftTime);
+				iTween.RotateTo (token, idleOptions);
+				
+				// Update Delay value
+				delay += shiftTime + idleTime;
+			}
+		
+		// If any other players have more shifts then this one, wait for them to finish
+		delay += (maxShifts - i) * (shiftTime + idleTime);
+		
+		// Set correctness of the motions
+		if (GameController.CheckTooFar(motion, correctMotion))
+			Invoke ("SetTokenIncorrect", delay);
+			
+		// Animate the motion (if any)
+		if (motion != Vector2.zero) {
+			// Set target for the motion
+			prevLoc = loc;
+			loc = loc + new Vector3 (motion.x, motion.y, 0);
+			
+			// Set up the options for the motion
+			Hashtable motionOptions = new Hashtable ();
+			Hashtable lookOptions = new Hashtable();
+			motionOptions.Add ("position", loc);
+			motionOptions.Add ("time", motionTime);
+			motionOptions.Add ("delay", delay);
+			motionOptions.Add ("easetype", iTween.EaseType.easeInOutQuad);
+			motionOptions.Add ("onStart", "SetAnimationRun");
+			motionOptions.Add ("oncomplete", "SetAnimationIdle");
+			lookOptions.Add ("rotation", Quaternion.LookRotation(new Vector3 (0,0,1), loc - prevLoc).eulerAngles);
+			lookOptions.Add ("time", turnTime);
+			lookOptions.Add ("delay", delay);
+			
+			// Animate the motion
+			iTween.MoveTo(token, motionOptions);
+			iTween.RotateTo (token, lookOptions);
+			
+			// Increment the delay value
+			delay += motionTime;
+		}
+		
+		// Responsibility
+		if (responsibility != null) {
+			// Get the responsibility values out of the parseobject
+			IList responsibilityCoordsI;
+			if (!responsibility.TryGetValue("Coordinates" , out responsibilityCoordsI)) {
+				Debug.LogError ("Cannot load responsibilty coordinates!");
+			}
+			else {
+				List <Vector2> responsibilityCoords = new List<Vector2>();
+				foreach (IList c in responsibilityCoordsI)
+					responsibilityCoords.Add (new Vector2(float.Parse(c[0].ToString()), float.Parse(c[1].ToString())));
+				
+				// Check Responsibility correctness
+				if (responsibility.ObjectId != correctResponsibility.ObjectId)
+					Invoke ("SetTokenIncorrect", delay);
+				
+				// Animator for the responsibility
+				foreach (Vector2 v in responsibilityCoords){
+					// Set the target for this leg of the responsibility
+					prevLoc = loc;
+					loc = loc + new Vector3 (v.x, v.y, 0);
+					
+					// Options for the leg of the responsibility
+					Hashtable respOptions = new Hashtable();
+					Hashtable lookOptions = new Hashtable();
+					respOptions.Add ("position", loc);
+					respOptions.Add ("time", responsibilityTime / responsibilityCoords.Count);
+					respOptions.Add ("delay", delay);
+					respOptions.Add ("easetype", iTween.EaseType.linear);
+					respOptions.Add ("onstart", "SetAnimationRun");
+					lookOptions.Add ("rotation", Quaternion.LookRotation(new Vector3 (0,0,1), loc - prevLoc).eulerAngles);
+					lookOptions.Add ("time", 0.1f);
+					lookOptions.Add ("delay", delay);
+					
+					// Animate the leg of the responsibility
+					iTween.MoveTo (token, respOptions);
+					iTween.RotateTo (token, lookOptions);
+					
+					// Update the delay
+					delay += responsibilityTime / responsibilityCoords.Count;
+				}
+				// Stop motion at the end of the responsiblity
+				Invoke("SetAnimationIdle", delay);
+			}
+		}
+		else if (correctResponsibility != null)
+			Invoke("SetTokenIncorrect", delay);
+	}
+	
+	public void AnimateCorrectPlay() {
+		// Move to the start of the path
+		ClearTokenIncorrect ();
+		MoveToCorrectStart ();
+		
+		// Hide the input lines
+		linesShow (false);
+		
+		// Set up local variables
+		float delay = 0f;
+		GameObject token = this.gameObject;
+		Vector3 loc = correctLocation;
+		Vector3 prevLoc = loc;
+		
+		// Loop through and animate each shift 
+		int i = 0;
+		if (shifts != null)
+			for (i = 0; i < correctShifts.Count; i++){
+				// Set target for the shift
+				prevLoc = loc;
+				loc = loc + new Vector3 (correctShifts[i].x, correctShifts[i].y, 0);
+				
+				// Set up the shift options
+				Hashtable shiftOptions = new Hashtable();
+				Hashtable lookOptions = new Hashtable();
+				shiftOptions.Add ("position", loc);
+				shiftOptions.Add ("time", shiftTime);
+				shiftOptions.Add ("delay", delay);
+				shiftOptions.Add ("easetype", iTween.EaseType.easeInOutQuad);
+				shiftOptions.Add ("onstart", "SetAnimationRun");
+				shiftOptions.Add ("oncomplete", "SetAnimationIdle");
+				lookOptions.Add ("rotation", Quaternion.LookRotation(new Vector3 (0,0,1), loc - prevLoc).eulerAngles);
+				lookOptions.Add ("time", turnTime);
+				lookOptions.Add ("delay", delay);
+				
+				// Animate the shift
+				iTween.MoveTo (token, shiftOptions);
+				iTween.RotateTo (token, lookOptions);
+				
+				// Stand idle during the delay between shifts
+				Hashtable idleOptions = new Hashtable();
+				idleOptions.Add ("y", 1f);
+				idleOptions.Add ("islocal", true);
+				idleOptions.Add ("time", idleTime);
+				idleOptions.Add ("delay", delay + shiftTime);
+				iTween.RotateTo (token, idleOptions);
+				
+				// Update Delay value
+				delay += shiftTime + idleTime;
+			}
+		
+		// If any other players have more shifts then this one, wait for them to finish
+		delay += (correctMaxShifts - i) * (shiftTime + idleTime);
+		
+		// Animate the motion (if any)
+		if (correctMotion != Vector2.zero) {
+			// Set target for the motion
+			prevLoc = loc;
+			loc = loc + new Vector3 (correctMotion.x, correctMotion.y, 0);
+			
+			// Set up the options for the motion
+			Hashtable motionOptions = new Hashtable ();
+			Hashtable lookOptions = new Hashtable();
+			motionOptions.Add ("position", loc);
+			motionOptions.Add ("time", motionTime);
+			motionOptions.Add ("delay", delay);
+			motionOptions.Add ("easetype", iTween.EaseType.easeInOutQuad);
+			motionOptions.Add ("onStart", "SetAnimationRun");
+			motionOptions.Add ("oncomplete", "SetAnimationIdle");
+			lookOptions.Add ("rotation", Quaternion.LookRotation(new Vector3 (0,0,1), loc - prevLoc).eulerAngles);
+			lookOptions.Add ("time", turnTime);
+			lookOptions.Add ("delay", delay);
+			
+			// Animate the motion
+			iTween.MoveTo(token, motionOptions);
+			iTween.RotateTo (token, lookOptions);
+			
+			// Increment the delay value
+			delay += motionTime;
+		}
+		
+		// Responsibility
+		Debug.Log ("RespDelay: " + delay);
+		string rName;
+		if (!correctResponsibility.TryGetValue("Name" , out rName)) {
+			rName = "ISNULL";
+		}
+		Debug.Log (rName);
+		if (correctResponsibility != null) {
+			Debug.Log ("NotNull");
+			// Get the responsibility values out of the parseobject
+			IList responsibilityCoordsI;
+			if (!correctResponsibility.TryGetValue("Coordinates" , out responsibilityCoordsI)) {
+				Debug.LogError ("Cannot load responsibilty coordinates!");
+			}
+			else {
+				List <Vector2> responsibilityCoords = new List<Vector2>();
+				foreach (IList c in responsibilityCoordsI)
+					responsibilityCoords.Add (new Vector2(float.Parse(c[0].ToString()), float.Parse(c[1].ToString())));
+				
+				// Animator for the responsibility
+				foreach (Vector2 v in responsibilityCoords){
+					// Set the target for this leg of the responsibility
+					prevLoc = loc;
+					loc = loc + new Vector3 (v.x, v.y, 0);
+					
+					// Options for the leg of the responsibility
+					Hashtable respOptions = new Hashtable();
+					Hashtable lookOptions = new Hashtable();
+					respOptions.Add ("position", loc);
+					respOptions.Add ("time", responsibilityTime / responsibilityCoords.Count);
+					respOptions.Add ("delay", delay);
+					respOptions.Add ("easetype", iTween.EaseType.linear);
+					respOptions.Add ("onstart", "SetAnimationRun");
+					lookOptions.Add ("rotation", Quaternion.LookRotation(new Vector3 (0,0,1), loc - prevLoc).eulerAngles);
+					lookOptions.Add ("time", 0.1f);
+					lookOptions.Add ("delay", delay);
+					
+					// Animate the leg of the responsibility
+					iTween.MoveTo (token, respOptions);
+					iTween.RotateTo (token, lookOptions);
+					
+					// Update the delay
+					delay += responsibilityTime / responsibilityCoords.Count;
+				}
+				// Stop motion at the end of the responsiblity
+				Hashtable endOptions = new Hashtable();
+				endOptions.Add ("position",loc);
+				endOptions.Add ("time", 0f);
+				endOptions.Add ("delay", delay);
+				endOptions.Add ("oncomplete", "SetAnimationIdle");
+				iTween.MoveTo (token, endOptions);
+			}
+		}	
+	}
+	
+	// Helper functions for play animation
+	// Move the player token to the starting location
+	private void MoveToStart() {
+		this.transform.position = location;
+	}
+	private void MoveToCorrectStart() {
+		this.transform.position = correctLocation;
+	}
+	// Animate a Shift
+	// Animate the Motion
+	// Animate the Responsibility
+	// Set Idle the token for a given amount of time
+	private void AnimateIdle (float seconds, float delay) {
+		
+	}
+	// Set the token animation to Running
+	private void SetAnimationRun () {
+		bigGuyAnimator.Play ("run_cycle");
+	}
+	
+	// Set the token animation to Idle
+	private void SetAnimationIdle () {
+		bigGuyAnimator.Play ("Idle");
+	}
+	
+	private void SetTokenIncorrect () {
+		bigGuyModel.GetComponent<SkinnedMeshRenderer>().material = ghostMaterial;
+	}
+	
+	private void ClearTokenIncorrect () {
+		bigGuyModel.GetComponent<SkinnedMeshRenderer>().material = defaultMaterial;
+	}
+	
+	private void linesShow(bool visible) {
+		foreach(LineRenderer line in lines)
+		{
+			line.enabled = visible;
+		}
 	}
 }	

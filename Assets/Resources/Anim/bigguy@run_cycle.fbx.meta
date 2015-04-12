@@ -1,21 +1,26 @@
 fileFormatVersion: 2
 guid: 9892ec51574e0184ba1443f8904082bb
 labels:
-- Human
-- Character
-- Toon
 - Cartoon
-- Spoccer
 - Football
-- Mobile
 - Game
-- Animation
+- Lowpoly
+- Men
+- Mobile
 - Phone
 - Player
-- Lowpoly
-- 3d
-- Men
+- Soccer
+- Toon
+- Animated
+- Animation
+- Human
+- Character
+- Model
+- pack
+- players
 - Big
+- Tall
+- Short
 ModelImporter:
   serializedVersion: 16
   fileIDToRecycleName:
