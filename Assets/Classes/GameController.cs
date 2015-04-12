@@ -27,6 +27,8 @@ public class GameController : MonoBehaviour {
 	void NewPlay () {
 		currentPlay = databaseController.SelectPlay ();
 
+		PlayerToken.newPlay ();
+
 		string pName;
 		bool nameResult = currentPlay.TryGetValue("Name", out pName);
 		if (nameResult) 
@@ -229,31 +231,31 @@ public class GameController : MonoBehaviour {
 		return 1;
 	}
 
-	bool CheckTooFar(Vector2 correct, Vector2 input)
+	public static bool CheckTooFar(Vector2 correct, Vector2 input)
 	{
 		if (correct == Vector2.zero && input !=Vector2.zero) 
 		{
-			return false;
+			return true;
 		}
 		
 		float distance = Vector2.Distance (correct, input);
 		if (distance > distanceCorrectnessThreshold)
 		{
-			return false;
+			return true;
 		}
 		
-		return true;
+		return false;
 	}
 
-	bool CheckTooFar(Vector3 correct, Vector3 input)
+	public static bool CheckTooFar(Vector3 correct, Vector3 input)
 	{
 		float distance = Vector3.Distance (correct, input);
 		if (distance > distanceCorrectnessThreshold)
 		{
-			return false;
+			return true;
 		}
 		
-		return true;
+		return false;
 	}
 
 	float SRSRecalculate (int correctness, System.DateTime sinceLastPlayed) {

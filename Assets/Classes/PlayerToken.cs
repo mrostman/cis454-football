@@ -159,7 +159,7 @@ public class PlayerToken : MonoBehaviour {
 		state = STATE.UNINITIALIZED;
 	}
 	
-	private static void newPlay() {
+	public static void newPlay() {
 		huddleIndex = 0;
 	}
 	
