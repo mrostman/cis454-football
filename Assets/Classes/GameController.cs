@@ -13,7 +13,7 @@ public class GameController : MonoBehaviour {
 	public System.DateTime playLastSeen;
 	private string playName;
 	private int timeLeft;
-	private float distanceCorrectnessThreshold = 4;
+	private const float distanceCorrectnessThreshold = 4;
 
 	Queue playsToUpdate = new Queue ();
 	Queue userPlaysToUpload = new Queue ();
@@ -22,19 +22,24 @@ public class GameController : MonoBehaviour {
 	void Start () {
 	
 	}
+	
+	public void testFunc() { Debug.Log("Test"); }
 
 	// called when a new round of gameplay begins
-	void NewPlay () {
+	public void NewPlay () {
+		int testI = 0;
+		Debug.Log (testI++);
 		currentPlay = databaseController.SelectPlay ();
-
+		Debug.Log (testI++);
 		PlayerToken.newPlay ();
-
+		Debug.Log (testI++);
 		string pName;
 		bool nameResult = currentPlay.TryGetValue("Name", out pName);
 		if (nameResult) 
 		{
 			playName = pName;
 		}
+		Debug.Log (playName);
 
 		ParseObject oTeam;
 		bool oTeamResult = currentPlay.TryGetValue("OffensiveTeam", out oTeam);
@@ -72,16 +77,20 @@ public class GameController : MonoBehaviour {
 	}
 
 	// called to perform cleanup at the end of a round of play
-	void EndPlay () {
+	public void EndPlay () {
 		// reset all PLayerTokens
-		for (int i=0; i<11; i++) 
-		{
-			offensiveTeam[i].deInitialize();
-			defensiveTeam[i].deInitialize();
-		}
+		//for (int i=0; i<11; i++) 
+		//{
+		//	offensiveTeam[i].deInitialize();
+		//	defensiveTeam[i].deInitialize();
+		//}
+		Debug.Log (playName);
+		foreach (PlayerToken oPlayer in offensiveTeam)
+			oPlayer.AnimateCorrectPlay();
 
 		// check correctness and calculate new SRS coefficient
 		int correctness = EvaluateCorrectness ();
+		Debug.Log(correctness);
 		float newSRS = SRSRecalculate (correctness,playLastSeen);
 
 		// save user input into a "History" ParseObject to be send to DB
@@ -123,9 +132,9 @@ public class GameController : MonoBehaviour {
 			}
 
 			// check correctness of location
-			bool inputLocationResult = inputParsePlayer.TryGetValue("Location", out inputLocation);
+			//bool inputLocationResult = inputParsePlayer.TryGetValue("Location", out inputLocation);
 			// Location should always be set, so if no location is found output a debug message
-			if (!inputLocationResult)
+			/*if (!inputLocationResult)
 			{
 				string position;
 				bool nameResult = inputParsePlayer.TryGetValue("Position", out position);
@@ -147,20 +156,20 @@ public class GameController : MonoBehaviour {
 					Debug.Log ("error in correctness evaluation, no correct location for player " + position);
 				}
 				return 0;
-			}
+			}*/
 
-			bool wrongLocation = CheckTooFar(inputLocation, correctLocation);
+			bool wrongLocation = CheckTooFar(oPlayer.location, oPlayer.correctLocation);
 			if (wrongLocation)
 			{
 				return 0;
 			}
 
 			// check correctness of motion
-			bool inputMotionResult = inputParsePlayer.TryGetValue("Motion", out inputMotion);
-			bool correctMotionResult = correctParsePlayer.TryGetValue("Motion", out correctMotion);
+			//bool inputMotionResult = inputParsePlayer.TryGetValue("Motion", out inputMotion);
+			//bool correctMotionResult = correctParsePlayer.TryGetValue("Motion", out correctMotion);
 
 			// if one of the two has a motion set and the other doesn't, return incorrect
-			if (!inputMotionResult || !correctMotionResult)
+			/*if (!inputMotionResult || !correctMotionResult)
 			{
 				string position;
 				bool nameResult = inputParsePlayer.TryGetValue("Position", out position);
@@ -169,19 +178,19 @@ public class GameController : MonoBehaviour {
 					Debug.Log ("error in correctness evaluation, null motion for player: " + position);
 				}
 				return 0;
-			}
+			}*/
 
 			// if both have a motion, check how far apart they are and return incorrect if it exceeds the threshold
 
 
-			bool wrongMotion = CheckTooFar (inputMotion, correctMotion);
+			bool wrongMotion = CheckTooFar (oPlayer.motion, oPlayer.correctMotion);
 			if (wrongMotion)
 			{
 				return 0;
 			}
 
 			// check correctness of shifts
-			bool inputShiftResult = inputParsePlayer.TryGetValue("Shifts", out inputShifts);
+			/*bool inputShiftResult = inputParsePlayer.TryGetValue("Shifts", out inputShifts);
 			bool correctShiftResult = correctParsePlayer.TryGetValue("Shifts", out correctShifts);
 
 			// if one of the two has a shift set and the other doesn't, return incorrect
@@ -194,17 +203,17 @@ public class GameController : MonoBehaviour {
 					Debug.Log ("error in correctness evaluation, null shift for player: " + position);
 				}
 				return 0;
-			}
+			}*/
 
 
-			if(inputShifts.Count != correctShifts.Count)
+			if(oPlayer.shifts.Count != oPlayer.correctShifts.Count)
 			{
 				return 0;
 			}
 
-			for(int i=0;i<inputShifts.Count;i++)
+			for(int i=0; i<oPlayer.shifts.Count;i++)
 			{
-				bool wrongShift = CheckTooFar(inputShifts[i],correctShifts[i]);
+				bool wrongShift = CheckTooFar(oPlayer.shifts[i],oPlayer.correctShifts[i]);
 				if (wrongShift)
 				{
 					return 0;
@@ -212,7 +221,7 @@ public class GameController : MonoBehaviour {
 			}
 
 			// check correctness of responsibility
-			bool inputResponsibilityResult = inputParsePlayer.TryGetValue("Responsib", out inputResponsibility);
+			/*bool inputResponsibilityResult = inputParsePlayer.TryGetValue("Responsib", out inputResponsibility);
 			bool correctResponsibilityResult = correctParsePlayer.TryGetValue("Responsib", out correctResponsibility);
 
 			if (inputResponsibilityResult ^ correctResponsibilityResult)
@@ -222,10 +231,11 @@ public class GameController : MonoBehaviour {
 
 			if (inputResponsibilityResult && correctResponsibilityResult)
 			{
-				if (inputResponsibility.ObjectId != correctResponsibility.ObjectId)
-				{
-					return 0;
-				}
+
+			}*/
+			if (oPlayer.responsibility.ObjectId != oPlayer.correctResponsibility.ObjectId)
+			{
+				return 0;
 			}
 		}
 		return 1;

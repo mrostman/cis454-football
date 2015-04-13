@@ -5,7 +5,7 @@ using Parse;
 using System.Threading.Tasks;
 
 public class DatabaseController : MonoBehaviour {
-	public bool databaseLoaded;
+	public static bool databaseLoaded;
 	float srsDefaultValue = 1;
 	float recencyDelayFactor = 1;
 	List<ParseObject> playQueryResults = new List<ParseObject> ();
@@ -350,7 +350,7 @@ public class DatabaseController : MonoBehaviour {
 		}
 
 		databaseLoaded = true;
-		initializeTeamsTEST();
+		//initializeTeamsTEST();
 	}
 
 	// TODO: Remove this function! (For testing only
@@ -380,10 +380,12 @@ public class DatabaseController : MonoBehaviour {
 		}
 	}
 
-	public ParseObject SelectPlay () 
+	public ParseObject SelectPlay ()
 	{
+		Debug.Log (databaseLoaded);
 		float coefficientTotal = CalculateSRSTotal();
-		float selectionValue = Random.value*coefficientTotal;
+		float selectionValue = Random.Range(0, coefficientTotal);
+		Debug.Log (selectionValue);
 		float runningSrsSum = 0;
 		ParseObject selectedPlay = null;
 
@@ -403,21 +405,22 @@ public class DatabaseController : MonoBehaviour {
 					srsRow[play.ObjectId] = srsValue;
 				}
 				runningSrsSum = runningSrsSum + srsValue;
+				if (runningSrsSum >= selectionValue){
+					selectedPlay = play;
+					break;
+				}
+					
 			}
 			else
 			{
 				Debug.Log ("more than one set of srs coefficients for current user: ");
 			}
+		}
 
-			bool recentlySeen = TooRecentlySeen(play);
-			if (recentlySeen)
-			{
-				selectedPlay = SelectPlay();
-			}
-			else
-			{
-				selectedPlay = play;
-			}
+		bool recentlySeen = TooRecentlySeen(selectedPlay);
+		if (recentlySeen)
+		{
+			selectedPlay = SelectPlay();
 		}
 
 		if (selectedPlay == null) 

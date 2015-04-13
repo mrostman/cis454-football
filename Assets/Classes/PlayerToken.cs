@@ -43,17 +43,17 @@ public class PlayerToken : MonoBehaviour {
 	private string position;			// Name of the player's position
 	
 	// Assigned variables (The 'correct' input)
-	private Vector3 correctLocation;	// Location of the token
-	private Vector2 correctMotion;		// Assigned motion
-	private List<Vector2> correctShifts;// Assigned shifts
-	private ParseObject correctResponsibility;// Assigned responsibility
+	public Vector3 correctLocation;		// Location of the token
+	public Vector2 correctMotion;		// Assigned motion
+	public List<Vector2> correctShifts; // Assigned shifts
+	public ParseObject correctResponsibility;// Assigned responsibility
 	private static int correctMaxShifts;// Highest number of assigned shifts among all players 
 	
 	// User input variables (The user's input)
-	private Vector3 location;			// Location of the token
-	private Vector2 motion;				// Input motion
-	private List<Vector2> shifts;		// Input shifts
-	private ParseObject responsibility;	// Input responsibility
+	public Vector3 location;			// Location of the token
+	public Vector2 motion;				// Input motion
+	public List<Vector2> shifts;		// Input shifts
+	public ParseObject responsibility;	// Input responsibility
 	private static int maxShifts;		// Highest number of input shifts among all players
 
 	// Display text
@@ -120,7 +120,7 @@ public class PlayerToken : MonoBehaviour {
 		if (!parsePlayer.TryGetValue("Controllable", 	out controllable)) 	{ controllable = false; }
 		if (!parsePlayer.TryGetValue("Abbreviation", 	out abbreviation)) 	{ abbreviation = ""; }
 		if (!parsePlayer.TryGetValue("Position"    , 	out position    )) 	{ position = ""; }
-		if (!parsePlayer.TryGetValue("Responsib", 	out correctResponsibility)){ Debug.Log ("NULLRESP" + abbreviation); correctResponsibility = null; }
+		if (!parsePlayer.TryGetValue("Responsib", 	out correctResponsibility)){ correctResponsibility = null; }
 		
 		// Set token to display abbreviation
 		displayText.text = abbreviation;
@@ -271,7 +271,7 @@ public class PlayerToken : MonoBehaviour {
 	
 	void showMenuInitialized() {
 		if (menuSpawnTime++ == 0)
-			menu.InitPie(MenuController.menuContentInitialized.ToArray());
+			menu.InitPie(PieMenuController.menuContentInitialized.ToArray());
 		else if (menuSpawnTime++ < 20)
 			return;
 		else if (Input.GetMouseButtonDown(0)){
@@ -290,7 +290,7 @@ public class PlayerToken : MonoBehaviour {
 				responsibilityMenu = true;
 				menuPage = 0;
 				menuSpawnTime = 1;
-				menu.TransitionPie(MenuController.menuContentResponsibility[menuPage].ToArray());
+				menu.TransitionPie(PieMenuController.menuContentResponsibility[menuPage].ToArray());
 			}
 			else if (menu.Selected == 3 && Input.GetMouseButtonDown(0)) {	// "Cancel" Selected
 				menu.Close();
@@ -305,7 +305,7 @@ public class PlayerToken : MonoBehaviour {
 
 	void showMenuShifted(){
 		if (menuSpawnTime++ == 0)
-			menu.InitPie(MenuController.menuContentShifted.ToArray());
+			menu.InitPie(PieMenuController.menuContentShifted.ToArray());
 		else if (menuSpawnTime++ < 20)
 			return;
 		else if (Input.GetMouseButtonDown(0)){
@@ -326,7 +326,7 @@ public class PlayerToken : MonoBehaviour {
 					responsibilityMenu = true;
 					menuPage = 0;
 					menuSpawnTime = 1;
-					menu.TransitionPie(MenuController.menuContentResponsibility[menuPage].ToArray());
+					menu.TransitionPie(PieMenuController.menuContentResponsibility[menuPage].ToArray());
 					break;
 				case 3:
 					clearInput();
@@ -345,7 +345,7 @@ public class PlayerToken : MonoBehaviour {
 	
 	void showMenuMotioned(){
 		if (menuSpawnTime++ == 0)
-			menu.InitPie(MenuController.menuContentMotioned.ToArray());
+			menu.InitPie(PieMenuController.menuContentMotioned.ToArray());
 		else if (menuSpawnTime++ < 20)
 			return;
 		else if (Input.GetMouseButtonDown(0)){
@@ -356,7 +356,7 @@ public class PlayerToken : MonoBehaviour {
 				responsibilityMenu = true;
 				menuPage = 0;
 				menuSpawnTime = 1;
-				menu.TransitionPie(MenuController.menuContentResponsibility[menuPage].ToArray());
+				menu.TransitionPie(PieMenuController.menuContentResponsibility[menuPage].ToArray());
 				break;
 			case 1:
 				clearInput();
@@ -374,19 +374,19 @@ public class PlayerToken : MonoBehaviour {
 	}
 	
 	void showMenuResponsibility() {
-		List<GUIContent> page = MenuController.menuContentResponsibility[menuPage];
+		List<GUIContent> page = PieMenuController.menuContentResponsibility[menuPage];
 		if (menuSpawnTime++ == 0)
-			menu.TransitionPie(MenuController.menuContentResponsibility[menuPage].ToArray());
+			menu.TransitionPie(PieMenuController.menuContentResponsibility[menuPage].ToArray());
 		else if (menuSpawnTime++ < 20)
 			return;
 		else if (Input.GetMouseButtonDown(0)){
 			GUIContent selected = page[menu.Selected];
 			if (selected.tooltip.Equals("Back")) {
-				menu.TransitionPie(MenuController.menuContentResponsibility[--menuPage].ToArray ());
+				menu.TransitionPie(PieMenuController.menuContentResponsibility[--menuPage].ToArray ());
 				menuSpawnTime = 1;
 			}
 			else if (selected.tooltip.Equals("Next")) {
-				menu.TransitionPie(MenuController.menuContentResponsibility[++menuPage].ToArray ());
+				menu.TransitionPie(PieMenuController.menuContentResponsibility[++menuPage].ToArray ());
 				menuSpawnTime = 1;
 			}
 			else {
@@ -443,8 +443,6 @@ public class PlayerToken : MonoBehaviour {
 
 	// Called when the mouse button is pushed
 	void OnMouseDown() { 
-		Debug.Log ("AnimTest");
-	
 		Debug.Log ("Mouse down in " + state + ", Menu " + popMenu);
 		// Check if this click is the second click of a doubleclick, if so, we call the menu
 		if (doubleClickCount > 0) {
@@ -588,12 +586,25 @@ public class PlayerToken : MonoBehaviour {
 	public ParseObject getInputParseObject(){
 		ParseObject playerOut = new ParseObject("Player");
 		
+		float[] pLocation = new float[2];
+		float[] pMotion = new float[2];
+		List<float[]> pShifts = new List<float[]>();
+		
+		pLocation[0] = location.x;
+		pLocation[1] = location.y;
+		pMotion[0] = motion.x;
+		pMotion[1] = motion.y;
+		foreach (Vector2 shift in shifts)
+			pShifts.Add (new float[2] {shift.x, shift.y});
+		
+		
 		playerOut["Abbreviation"] = abbreviation;
 		playerOut["Position"] = position;
-		playerOut["Location"] = location;
-		playerOut["Motion"] = motion;
-		playerOut["Shifts"] = shifts;
-		playerOut["Responsib"] = ParseObject.CreateWithoutData("Responsibility", responsibility.ObjectId);
+		playerOut["Location"] = pLocation;
+		playerOut["Motion"] = pMotion;
+		playerOut["Shifts"] = pShifts;
+		if (responsibility != null)
+			playerOut["Responsib"] = ParseObject.CreateWithoutData("Responsibility", responsibility.ObjectId);
 		
 		return playerOut;
 	}
@@ -604,7 +615,7 @@ public class PlayerToken : MonoBehaviour {
 	}
 	
 	// Animate the input play
-	public void AnimateInputPlay() {
+	public float AnimateInputPlay() {
 		// Move to the start of the path
 		ClearTokenIncorrect ();
 		MoveToStart ();
@@ -631,8 +642,10 @@ public class PlayerToken : MonoBehaviour {
 				loc = loc + new Vector3 (shifts[i].x, shifts[i].y, 0);
 				
 				// Check correctness
-				if (GameController.CheckTooFar(shifts[i], correctShifts[i]))
+				if (i < correctShifts.Count && !GameController.CheckTooFar(shifts[i], correctShifts[i])) {}
+				else
 					Invoke ("SetTokenIncorrect", delay);
+				
 				
 				// Set up the shift options
 				Hashtable shiftOptions = new Hashtable();
@@ -742,11 +755,14 @@ public class PlayerToken : MonoBehaviour {
 				Invoke("SetAnimationIdle", delay);
 			}
 		}
-		else if (correctResponsibility != null)
+		else if (correctResponsibility != null){
 			Invoke("SetTokenIncorrect", delay);
+			delay += responsibilityTime;
+		}
+		return delay;
 	}
 	
-	public void AnimateCorrectPlay() {
+	public float AnimateCorrectPlay() {
 		// Move to the start of the path
 		ClearTokenIncorrect ();
 		MoveToCorrectStart ();
@@ -828,14 +844,7 @@ public class PlayerToken : MonoBehaviour {
 		}
 		
 		// Responsibility
-		Debug.Log ("RespDelay: " + delay);
-		string rName;
-		if (!correctResponsibility.TryGetValue("Name" , out rName)) {
-			rName = "ISNULL";
-		}
-		Debug.Log (rName);
 		if (correctResponsibility != null) {
-			Debug.Log ("NotNull");
 			// Get the responsibility values out of the parseobject
 			IList responsibilityCoordsI;
 			if (!correctResponsibility.TryGetValue("Coordinates" , out responsibilityCoordsI)) {
@@ -879,7 +888,10 @@ public class PlayerToken : MonoBehaviour {
 				endOptions.Add ("oncomplete", "SetAnimationIdle");
 				iTween.MoveTo (token, endOptions);
 			}
-		}	
+		}
+		else
+			delay += responsibilityTime;
+		return delay;	
 	}
 	
 	// Helper functions for play animation
