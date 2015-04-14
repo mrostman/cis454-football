@@ -11,7 +11,7 @@ public class GameController : MonoBehaviour {
 
 	private ParseObject currentPlay;
 	public System.DateTime playLastSeen;
-	private string playName;
+	public string playName;
 	private int timeLeft;
 	private const float distanceCorrectnessThreshold = 4;
 
@@ -27,6 +27,13 @@ public class GameController : MonoBehaviour {
 
 	// called when a new round of gameplay begins
 	public void NewPlay () {
+		// reset all PLayerTokens
+		for (int i=0; i<11; i++) 
+		{
+			offensiveTeam[i].deInitialize();
+			defensiveTeam[i].deInitialize();
+		}
+		
 		int testI = 0;
 		Debug.Log (testI++);
 		currentPlay = databaseController.SelectPlay ();
@@ -45,48 +52,73 @@ public class GameController : MonoBehaviour {
 		bool oTeamResult = currentPlay.TryGetValue("OffensiveTeam", out oTeam);
 		if (oTeamResult) 
 		{
+			Debug.Log ("Offensive Team Loaded");
 			ParseObject oPlayer;
 			string playerKey;
+			foreach (string s in oTeam.Keys)
+				Debug.Log ("Key: " + s);
 			for (int i=0;i<11;i++)
 			{
 				playerKey = "Player" + i.ToString();
 				bool oPlayerResult = oTeam.TryGetValue(playerKey, out oPlayer);
+				Debug.Log ("TryGetValueResult: " + oPlayerResult + ", ReturnedNull: " + (oPlayer == null));
 				if (oPlayerResult)
 				{
+					//Debug.Log ("Loaded offensive player " + i + oPlayer.IsDataAvailable);
 					offensiveTeam[i].Initialize(oPlayer);
 				}
+				else
+					
+					Debug.LogError ("Failed to get Offensive Player " + i);
 			}
 		}
+		else
+			Debug.LogError ("Failed to get offensive Team!");
 
 		ParseObject dTeam;
 		bool dTeamResult = currentPlay.TryGetValue("DefensiveTeam", out dTeam);
 		if (dTeamResult) 
 		{
+			Debug.Log ("Defensive Team Loaded");
 			ParseObject dPlayer;
 			string playerKey;
 			for (int i=0;i<11;i++)
 			{
 				playerKey = "Player" + i.ToString();
 				bool dPlayerResult = dTeam.TryGetValue(playerKey, out dPlayer);
+				Debug.Log ("TryGetValueResult: " + dPlayerResult + ", ReturnedNull: " + (dPlayer == null));
 				if (dPlayerResult)
 				{
 					defensiveTeam[i].Initialize(dPlayer);
 				}
+				else
+					Debug.LogError ("Failed to get Defensive Player " + i);
 			}
 		}
+		else
+			Debug.LogError ("Failed to get offensive Team!");
 	}
+	
+	public float AnimateCorrectPlay() {
+		float delay = 0f;
+		foreach (PlayerToken oPlayer in offensiveTeam)
+			delay = oPlayer.AnimateCorrectPlay();
+		return delay;
+	}
+	public float AnimateInputPlay() {
+		float delay = 0f;
+		foreach (PlayerToken oPlayer in offensiveTeam)
+			delay = oPlayer.AnimateInputPlay();
+		return delay;
+	}
+	
 
 	// called to perform cleanup at the end of a round of play
-	public void EndPlay () {
-		// reset all PLayerTokens
-		//for (int i=0; i<11; i++) 
-		//{
-		//	offensiveTeam[i].deInitialize();
-		//	defensiveTeam[i].deInitialize();
-		//}
+	public int EndPlay () {
 		Debug.Log (playName);
-		foreach (PlayerToken oPlayer in offensiveTeam)
-			oPlayer.AnimateCorrectPlay();
+		
+		// Animate the play
+		AnimateInputPlay ();
 
 		// check correctness and calculate new SRS coefficient
 		int correctness = EvaluateCorrectness ();
@@ -106,7 +138,9 @@ public class GameController : MonoBehaviour {
 			historyOTeam.Add(fieldName, historyOPlayer);
 		}
 		playsToUpdate.Enqueue (playHistory);
-		QueueUpdate ();
+		//QueueUpdate ();
+		
+		return correctness;
 	}
 
 	// iterate through all offensive team PlayerTokens and compare the user input data
@@ -295,5 +329,29 @@ public class GameController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+	}
+	
+	
+	// TODO: Temporary play editor functions
+	public void StartEditPlay() {
+		for (int i = 0; i < 11; i++) {
+			offensiveTeam[i].controllable = true;
+			defensiveTeam[i].controllable = true;
+		}
+	}
+	public void SaveThisPlay(string playName) {
+		ParseObject newPlay = new ParseObject("Play");
+		ParseObject newOffensiveTeam = new ParseObject("OffensiveTeam");
+		ParseObject newDefensiveTeam = new ParseObject("DefensiveTeam");
+		for(int i = 0; i < 11; i++) {
+			string playerName = "Player" + i;
+			newOffensiveTeam.Add (playerName, offensiveTeam[i].getInputParseObject());
+			newDefensiveTeam.Add (playerName, defensiveTeam[i].getInputParseObject());
+		}
+		newPlay["OffensiveTeam"] = newOffensiveTeam;
+		newPlay["DefensiveTeam"] = newDefensiveTeam;
+		newPlay["Name"] = playName;
+		
+		newPlay.SaveAsync(); 
 	}
 }

@@ -73,6 +73,7 @@ public class PlayerToken : MonoBehaviour {
 	private bool running = false;
 	private static Vector3 runningOffset = new Vector3(0,-0.6f,0);
 	private Vector3 facing = Vector3.zero;
+	private Quaternion defaultRotation;
 	
 	// Animation Variables
 	private const float shiftTime = 2f;
@@ -87,10 +88,12 @@ public class PlayerToken : MonoBehaviour {
 	// Initialization functions
 	public void Initialize(ParseObject iParsePlayer)
 	{
+		//Debug.Log ("Ready for init: " + state);
 		parsePlayer = iParsePlayer;
 	}
 	private void InitializeThreadsafe()
 	{
+		Debug.Log ("Initializing");
 		// Set initialized to avoid re-initialization
 		state = STATE.INITIALIZED;
 		
@@ -106,6 +109,7 @@ public class PlayerToken : MonoBehaviour {
 			iMotion.Add(0f); iMotion.Add (0f); }
 		if (!parsePlayer.TryGetValue("Shifts" ,    out iShifts    )) {
 			iShifts = new List<List<float>>();
+			Debug.Log ("ShiftGetFailed!");
 		}
 		
 		// Convert the raw lists to Unity Vectors
@@ -144,7 +148,7 @@ public class PlayerToken : MonoBehaviour {
 		
 		// Move the token to it's location
 		this.gameObject.transform.position = location;
-		
+		Debug.Log ("Init");
 		//bigGuyAnimator.playbackTime = Random.Range(0f, 100f);
 	}
 	public void deInitialize() {
@@ -156,9 +160,12 @@ public class PlayerToken : MonoBehaviour {
 			
 		/// Clear the shifts/motions/responsibilities
 		clearInput ();
+		ClearTokenIncorrect();	
 		
 		// Move the player out of sight
 		this.gameObject.transform.position = new Vector3(0,0,5);
+		this.gameObject.transform.rotation = defaultRotation;
+		bigGuyAnimator.Play ("Idle", -1, Random.Range (0f,2f));
 		
 		// Clear the text
 		abbreviation = "";
@@ -181,7 +188,7 @@ public class PlayerToken : MonoBehaviour {
 	// Set various variables to default values to avoid unset variable issues
 	void Awake () {
 		// Set the animation to a random position, so players arn't perfectly in sync
-		bigGuyAnimator.Play ("Idle", -1, Random.Range (0f,2f));
+		defaultRotation = this.gameObject.transform.rotation;
 		running = false;
 		
 		// Set various default values
@@ -253,6 +260,8 @@ public class PlayerToken : MonoBehaviour {
 		// Initialize the token if it's ready for initialization
 		if (state == STATE.UNINITIALIZED && parsePlayer != null)
 			InitializeThreadsafe();
+		else if (parsePlayer != null)
+			Debug.Log (state);
 	
 		// Handle snapping to grid. Target is determined on mouseUp (that is, when the user 'drops' the playerToken)
 		float distanceToTarget = Vector3.Distance(this.transform.position, target);
@@ -381,7 +390,7 @@ public class PlayerToken : MonoBehaviour {
 			return;
 		else if (Input.GetMouseButtonDown(0)){
 			GUIContent selected = page[menu.Selected];
-			if (selected.tooltip.Equals("Back")) {
+			if (selected.tooltip.Equals("Previous")) {
 				menu.TransitionPie(PieMenuController.menuContentResponsibility[--menuPage].ToArray ());
 				menuSpawnTime = 1;
 			}
@@ -391,10 +400,11 @@ public class PlayerToken : MonoBehaviour {
 			}
 			else {
 				int index;
-				if (menuPage == 0) 
+				if (menuPage == 0)
 					index = menu.Selected;
 				else
-					index = (7 + ( (menuPage - 1) * 6 ) + menu.Selected);
+					index = (4 + ( (menuPage - 1) * 4 ) + menu.Selected);
+				Debug.Log ("Index of Selected Responsibility: " + index);
 				responsibility = DatabaseController.responsibilityQueryResults[index];
 				responsibilityMenu = false;
 				menu.Close ();
@@ -617,6 +627,7 @@ public class PlayerToken : MonoBehaviour {
 	// Animate the input play
 	public float AnimateInputPlay() {
 		// Move to the start of the path
+		this.gameObject.transform.rotation = defaultRotation;
 		ClearTokenIncorrect ();
 		MoveToStart ();
 		
@@ -764,6 +775,7 @@ public class PlayerToken : MonoBehaviour {
 	
 	public float AnimateCorrectPlay() {
 		// Move to the start of the path
+		this.gameObject.transform.rotation = defaultRotation;
 		ClearTokenIncorrect ();
 		MoveToCorrectStart ();
 		

@@ -46,7 +46,6 @@ public class PieMenuController : MonoBehaviour {
 					page.Add (new GUIContent("", 
 											 Resources.Load<Texture2D>("Icons/" + name),
 											 name));
-					Debug.Log ("Icons/" + name + ".png");
 				}
 			}
 			outList.Add(page);
