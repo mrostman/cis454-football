@@ -4,12 +4,20 @@ using System.Collections.Generic;
 using Parse;
 
 public class GameController : MonoBehaviour {
+	// State handler
+	public enum STATE {INACTIVE, LOADING, INPLAY, POSTPLAY};
+	public STATE state = STATE.INACTIVE;
+
 	// Player Tokens
 	public List<PlayerToken> offensiveTeam;
 	public List<PlayerToken> defensiveTeam;
 	public DatabaseController databaseController;
 
+	// Variables for keeping track of the current play
 	private ParseObject currentPlay;
+	private string currentPlayID;
+	private bool playLoaded;
+	
 	public System.DateTime playLastSeen;
 	public string playName;
 	private int timeLeft;
@@ -20,7 +28,7 @@ public class GameController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-	
+		
 	}
 	
 	public void testFunc() { Debug.Log("Test"); }
@@ -97,6 +105,10 @@ public class GameController : MonoBehaviour {
 		}
 		else
 			Debug.LogError ("Failed to get offensive Team!");
+	}
+	
+	public void LoadedPlay(ParseObject loadedPlay) {
+		try
 	}
 	
 	public float AnimateCorrectPlay() {
