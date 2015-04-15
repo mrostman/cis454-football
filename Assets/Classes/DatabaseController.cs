@@ -5,7 +5,7 @@ using Parse;
 using System.Threading.Tasks;
 
 public class DatabaseController : MonoBehaviour {
-	public bool databaseLoaded;
+	public static bool databaseLoaded;
 	float srsDefaultValue = 1;
 	float recencyDelayFactor = 1;
 	List<ParseObject> playQueryResults = new List<ParseObject> ();
@@ -19,10 +19,15 @@ public class DatabaseController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		GetPlays ();
+		//GetPlays ();
+	}
+	
+	public bool Login () {
+		return false;
 	}
 
-	void GetPlays () 
+
+	public void GetPlays () 
 	{
 		ParseUser.LogInAsync("kris", "password").ContinueWith(t =>
 		{	
@@ -41,7 +46,7 @@ public class DatabaseController : MonoBehaviour {
 			Task srsTask = srsQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {srsQueryResults.Add (i);}});
 			Task oTeamTask = oTeamQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {oTeamQueryResults.Add (i);}});
 			Task dTeamTask = dTeamQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {dTeamQueryResults.Add (i);}});
-			Task playerTask = playerQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {playerQueryResults.Add (i);}});
+			Task playerTask = playerQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) { playerQueryResults.Add (i);}});
 			Task responsibilityTask = responsibilityQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {responsibilityQueryResults.Add (i);}});
 
 			List<Task> tasks = new List<Task>();
@@ -79,6 +84,7 @@ public class DatabaseController : MonoBehaviour {
 
 	void RebuildReferences ()
 	{
+		Debug.Log ("Player count: " + playerQueryResults.Count);
 		foreach(ParseObject i in playQueryResults)
 		{
 			//Debug.Log ("Play Name");
@@ -136,7 +142,13 @@ public class DatabaseController : MonoBehaviour {
 			if (result)
 			{
 				string player0ID = player0Reference.ObjectId;
+
 				ParseObject player0 = playerQueryResults.Find (e => e.ObjectId == player0ID);
+				// TODO: Remove this (For debugging)
+				if (player0ID == "pF6PQpDjuB"){
+					Debug.Log ("FOUND PLAYER 0");
+					Debug.Log(player0 == null);
+				}
 				k["Player0"] = player0;
 			}
 			
@@ -350,7 +362,7 @@ public class DatabaseController : MonoBehaviour {
 		}
 
 		databaseLoaded = true;
-		initializeTeamsTEST();
+		//initializeTeamsTEST();
 	}
 
 	// TODO: Remove this function! (For testing only
@@ -380,10 +392,12 @@ public class DatabaseController : MonoBehaviour {
 		}
 	}
 
-	public ParseObject SelectPlay () 
+	public ParseObject SelectPlay ()
 	{
+		Debug.Log (databaseLoaded);
 		float coefficientTotal = CalculateSRSTotal();
-		float selectionValue = Random.value*coefficientTotal;
+		float selectionValue = Random.Range(0, coefficientTotal);
+		Debug.Log (selectionValue);
 		float runningSrsSum = 0;
 		ParseObject selectedPlay = null;
 
@@ -403,21 +417,22 @@ public class DatabaseController : MonoBehaviour {
 					srsRow[play.ObjectId] = srsValue;
 				}
 				runningSrsSum = runningSrsSum + srsValue;
+				if (runningSrsSum >= selectionValue){
+					selectedPlay = play;
+					break;
+				}
+					
 			}
 			else
 			{
 				Debug.Log ("more than one set of srs coefficients for current user: ");
 			}
+		}
 
-			bool recentlySeen = TooRecentlySeen(play);
-			if (recentlySeen)
-			{
-				selectedPlay = SelectPlay();
-			}
-			else
-			{
-				selectedPlay = play;
-			}
+		bool recentlySeen = TooRecentlySeen(selectedPlay);
+		if (recentlySeen)
+		{
+			selectedPlay = SelectPlay();
 		}
 
 		if (selectedPlay == null) 
