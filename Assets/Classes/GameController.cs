@@ -34,6 +34,9 @@ public class GameController : MonoBehaviour {
 
 	// called when a new round of gameplay begins
 	public void NewPlay () {
+		// Reset the displayed play name
+		playName = "";
+		
 		// Reset all PlayerTokens
 		for (int i=0; i<11; i++) 
 		{
@@ -53,13 +56,9 @@ public class GameController : MonoBehaviour {
 	}
 	
 	// Called by update when a selected play has been loaded successfully
-	private void SetupNewPlay() {	
-		string pName;
-		bool nameResult = currentPlay.TryGetValue("Name", out pName);
-		if (nameResult) 
-		{
-			playName = pName;
-		}
+	private void SetupNewPlay() {
+		currentPlay.TryGetValue("Name", out playName);
+		
 		Debug.Log (playName);
 		
 		ParseObject oTeam;
