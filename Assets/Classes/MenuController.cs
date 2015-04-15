@@ -217,13 +217,13 @@ public class MenuController : MonoBehaviour {
 	public void AnimateCorrectPlay() {
 		DisableInPlayCanvas();
 		float delay = gameController.AnimateCorrectPlay();
-		Invoke ("EnableInPlayCanvas",delay);
+		Invoke ("EnableInPlayCanvas",delay+1f);
 	}
 	
 	public void AnimateInputPlay() {
 		DisableInPlayCanvas();
 		float delay = gameController.AnimateInputPlay();
-		Invoke ("EnableInPlayCanvas",delay);
+		Invoke ("EnableInPlayCanvas",delay+1f);
 	}
 	
 	private void ShowInPlayButtons() {

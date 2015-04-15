@@ -5,7 +5,7 @@ using Parse;
 
 public class GameController : MonoBehaviour {
 	// State handler
-	public enum STATE {INACTIVE, LOADING, INPLAY, POSTPLAY};
+	public enum STATE {INACTIVE, LOADING, LOADED, SETUP, INPLAY, POSTPLAY};
 	public STATE state = STATE.INACTIVE;
 
 	// Player Tokens
@@ -16,7 +16,6 @@ public class GameController : MonoBehaviour {
 	// Variables for keeping track of the current play
 	private ParseObject currentPlay;
 	private string currentPlayID;
-	private bool playLoaded;
 	
 	public System.DateTime playLastSeen;
 	public string playName;
@@ -35,19 +34,26 @@ public class GameController : MonoBehaviour {
 
 	// called when a new round of gameplay begins
 	public void NewPlay () {
-		// reset all PLayerTokens
+		// Reset all PlayerTokens
 		for (int i=0; i<11; i++) 
 		{
 			offensiveTeam[i].deInitialize();
 			defensiveTeam[i].deInitialize();
 		}
-		
-		int testI = 0;
-		Debug.Log (testI++);
-		currentPlay = databaseController.SelectPlay ();
-		Debug.Log (testI++);
 		PlayerToken.newPlay ();
-		Debug.Log (testI++);
+		
+		// TODO: Statement to make DBController load the play here
+
+		// Select the next play to be displayed
+		currentPlay = databaseController.SelectPlay ();
+		
+		// Load the full contents of the selected play from the database
+		databaseController.loadPlay(currentPlay.ObjectId);
+		state = STATE.LOADING;
+	}
+	
+	// Called by update when a selected play has been loaded successfully
+	private void SetupNewPlay() {	
 		string pName;
 		bool nameResult = currentPlay.TryGetValue("Name", out pName);
 		if (nameResult) 
@@ -55,7 +61,7 @@ public class GameController : MonoBehaviour {
 			playName = pName;
 		}
 		Debug.Log (playName);
-
+		
 		ParseObject oTeam;
 		bool oTeamResult = currentPlay.TryGetValue("OffensiveTeam", out oTeam);
 		if (oTeamResult) 
@@ -82,7 +88,7 @@ public class GameController : MonoBehaviour {
 		}
 		else
 			Debug.LogError ("Failed to get offensive Team!");
-
+		
 		ParseObject dTeam;
 		bool dTeamResult = currentPlay.TryGetValue("DefensiveTeam", out dTeam);
 		if (dTeamResult) 
@@ -107,16 +113,22 @@ public class GameController : MonoBehaviour {
 			Debug.LogError ("Failed to get offensive Team!");
 	}
 	
-	public void LoadedPlay(ParseObject loadedPlay) {
-		try
+	// Used by DatabaseController to return the requested play
+	public void PlayLoaded(ParseObject loadedPlay) {
+		currentPlay = loadedPlay;
+		Debug.Log ("Play loaded: " + currentPlay.Get<string>("Name"));
+		state = STATE.LOADED;
 	}
 	
+	// Animate each player (With the correct data)
 	public float AnimateCorrectPlay() {
 		float delay = 0f;
 		foreach (PlayerToken oPlayer in offensiveTeam)
 			delay = oPlayer.AnimateCorrectPlay();
 		return delay;
 	}
+	
+	// Animate each player (With the data input by the user
 	public float AnimateInputPlay() {
 		float delay = 0f;
 		foreach (PlayerToken oPlayer in offensiveTeam)
@@ -125,7 +137,7 @@ public class GameController : MonoBehaviour {
 	}
 	
 
-	// called to perform cleanup at the end of a round of play
+	// Called at the end of gameplay of each play to grade the play, animate the results, and save them
 	public int EndPlay () {
 		Debug.Log (playName);
 		
@@ -339,8 +351,12 @@ public class GameController : MonoBehaviour {
 	}
 
 	// Update is called once per frame
+	//   Begins setting up the play once it has been loaded
 	void Update () {
-
+		if (state == STATE.LOADED) {
+			state = STATE.SETUP;
+			SetupNewPlay();
+		}
 	}
 	
 	
