@@ -17,28 +17,25 @@ public class PlayerToken : MonoBehaviour {
 	private Vector3 offset; 			// Tracking movement between frames
 	private static float heightFactor; 	// Tracking size of screen
 	private int doubleClickCount = 0;	// Doubleclick handling
+	
+	// Pie Menu handling variables
 	public bool popMenu = false; 		// Flag indicating the menu has been requested (via doubleclick)
-	private bool responsibilityMenu = false;
 	public PieMenu menu;
-	public GUIContent[] menuContentInitialized;
-	public GUIContent[] menuContentShifted;
-	public GUIContent[] menuContentMotioned;
-	public GUIContent[] menuContentResponsibility;
 	private Vector2 menuTarget;
-	private int menuSpawnTime;			// Counter to prevent clicks being immediately registered on menu
-	private int menuPage = 0;
+	private int menuSpawnTime;			// Counter to prevent accidental selections as the menu is appearing
+	private bool responsibilityMenu = false;
+	private int menuPage = 0;			// Tracker for the current page (in the responsibility menu)
 	
 	// Grid variables
-	private const int maxX = 10;  	// Horizontal grid size
+	private const int maxX = 10;  		// Horizontal grid size
 	private const int maxY = -9;		// Vertacle grid size	
 	private Vector3 target;				// Snap to grid - point to snap to
 	private Vector3 startPoint; 		// Snap to grid - point the token is snapping from
-	private bool snapping;				// Is the token in the process of snapping to a position?
 	private static List<Vector3> huddle;// Locations to put player tokens initially (in the huddle)
-	private static int huddleIndex;		// Locations to put 
+	private static int huddleIndex;		// Locations in the huddle to put the next player token
 	
-	// Game variables (set only at initialization
-	public bool controllable;			// Is the token controllable by the player
+	// Setup variables (set only at initialization)
+	public bool controllable;			// Is the token controllable by the player?
 	private string abbreviation;		// Abbreviation for the player's position
 	private string position;			// Name of the player's position
 	
@@ -59,23 +56,21 @@ public class PlayerToken : MonoBehaviour {
 	// Display text
 	public TextMesh displayText;		// Text to be displayed over player model (abbreviation usually)
 	
-	// Lines (For indicating input movements
+	// Lines (For indicating input movements)
 	public List<GameObject> lineHolders;
 	private List<LineRenderer> lines;
 	private int lineIndex;
 	
 	// Player Model
-	public GameObject bigGuy;
-	public GameObject bigGuyModel;
-	public Animator bigGuyAnimator;
-	public Material defaultMaterial;
-	public Material ghostMaterial;
-	private bool running = false;
-	private static Vector3 runningOffset = new Vector3(0,-0.6f,0);
-	private Vector3 facing = Vector3.zero;
-	private Quaternion defaultRotation;
+	public GameObject bigGuy;			// The GameObject for the player model
+	public GameObject bigGuyModel;		// The model within the player model GameObject
+	public Animator bigGuyAnimator;		// The animator for the player model
+	public Material defaultMaterial;	// Normal skin
+	public Material ghostMaterial;		// Transparent red skin, shows incorrect input
+	private Quaternion defaultRotation; // The 'default' direction for the player to be facing (Towards the other team)
 	
 	// Animation Variables
+	//   Constants for how long each step of the animation of the play lasts
 	private const float shiftTime = 2f;
 	private const float idleTime = 0.5f;
 	private const float motionTime = 2f;
@@ -85,15 +80,52 @@ public class PlayerToken : MonoBehaviour {
 	// Initialization parseObject
 	private ParseObject parsePlayer;
 	
-	// Initialization functions
+	// Awake: Called as soon as the object is loaded into the scene
+	// 	 Set various variables to default values to avoid unset variable issues
+	void Awake () {
+		// Set the animation to a random position, so players arn't perfectly in sync
+		defaultRotation = this.gameObject.transform.rotation;
+		
+		// Set various default values
+		deInitialize();
+		
+		// Set up tags and the screen size
+		heightFactor = 20.0f / Screen.height;
+		this.gameObject.tag = "token";
+		
+		// Set up the huddle list
+		if(huddle == null){
+			huddle = new List<Vector3>();
+			huddle.Add (new Vector3( 0, -6, -1));
+			huddle.Add (new Vector3(-1, -7, -1));
+			huddle.Add (new Vector3(-1, -8, -1));
+			huddle.Add (new Vector3( 0, -9, -1));
+			huddle.Add (new Vector3( 1, -8, -1));
+			huddle.Add (new Vector3( 1, -7, -1));
+			huddle.Add (new Vector3( 1, -6, -1));
+			huddle.Add (new Vector3(-1, -6, -1));
+			huddle.Add (new Vector3( 1, -9, -1));
+			huddle.Add (new Vector3(-1, -9, -1));
+			huddle.Add (new Vector3( 0, -9, -1));
+		}
+	}
+
+	/// <summary>
+	/// Initialize the PlayerToken. Does not occur instantly, but on the next Update call.
+	/// </summary>
+	/// <param name="iParsePlayer">The parse object representing the player to be initialized. Must be of the 'Player' 
+	/// Parse class.</param>
 	public void Initialize(ParseObject iParsePlayer)
 	{
 		//Debug.Log ("Ready for init: " + state);
 		parsePlayer = iParsePlayer;
 	}
+	
+	// Private method to handle the actual initialization on the next update after Initialize is called.
+	// Necessary due to Unity's threading restrictions.
 	private void InitializeThreadsafe()
 	{
-		Debug.Log ("Initializing");
+		Debug.Log ("Initializing Player " + parsePlayer.ObjectId);
 		// Set initialized to avoid re-initialization
 		state = STATE.INITIALIZED;
 		
@@ -124,9 +156,9 @@ public class PlayerToken : MonoBehaviour {
 		if (!parsePlayer.TryGetValue("Controllable", 	out controllable)) 	{ controllable = false; }
 		if (!parsePlayer.TryGetValue("Abbreviation", 	out abbreviation)) 	{ abbreviation = ""; }
 		if (!parsePlayer.TryGetValue("Position"    , 	out position    )) 	{ position = ""; }
-		if (!parsePlayer.TryGetValue("Responsib", 	out correctResponsibility)){ correctResponsibility = null; }
+		if (!parsePlayer.TryGetValue("Responsib", 		out correctResponsibility)){ correctResponsibility = null; }
 		
-		// Set token to display abbreviation
+		// Set token to display the player's abbreviation
 		displayText.text = abbreviation;
 		
 		// If the token is not controllable, set it to it's 'correct' values
@@ -137,7 +169,9 @@ public class PlayerToken : MonoBehaviour {
 			responsibility = correctResponsibility;
 			correctMaxShifts = System.Math.Max(correctMaxShifts, shifts.Count);
 		}
-		// Otherwise set it to the 'blank' starting values.
+		
+		// Otherwise set it to the 'blank' starting values. (A 'controllable' token is one where the user is expected
+		//   to provide the correct values.
 		else {
 			location = huddle[huddleIndex++];
 			shifts = new List<Vector2>();
@@ -146,11 +180,15 @@ public class PlayerToken : MonoBehaviour {
 			shiftsSet = motionSet = false;
 		}
 		
-		// Move the token to it's location
+		// Move the token to its assigned location (In the huddle for controllable tokens, or on the field in it's final
+		//   position for uncontrollable
 		this.gameObject.transform.position = location;
-		Debug.Log ("Init");
-		//bigGuyAnimator.playbackTime = Random.Range(0f, 100f);
+		Debug.Log ("Inititialization complete: Player " + parsePlayer.ObjectId);
 	}
+	
+	/// <summary>
+	/// De-Initialize the PlayerToken, scrubbing it of any user input and readying it to be re-initialized with new data
+	/// </summary>
 	public void deInitialize() {
 		// Set up the line renderers
 		lineIndex = 0;
@@ -158,82 +196,66 @@ public class PlayerToken : MonoBehaviour {
 		foreach (GameObject lineHolder in lineHolders)
 			lines.Add( lineHolder.GetComponent<LineRenderer>() );
 			
-		/// Clear the shifts/motions/responsibilities
+		// Clear the shifts/motions/responsibilities
 		clearInput ();
+		
+		// If the token was set incorrect, clear that
 		ClearTokenIncorrect();	
 		
-		// Move the player out of sight
+		// Move the player out of sight (under the field). Also reset rotation to default and the animation to idle
 		this.gameObject.transform.position = new Vector3(0,0,5);
 		this.gameObject.transform.rotation = defaultRotation;
 		bigGuyAnimator.Play ("Idle", -1, Random.Range (0f,2f));
 		
-		// Clear the text
+		// Clear the text above the token
 		abbreviation = "";
 		displayText.text = abbreviation;
 		
 		// Set other essential variables to default values
 		controllable = false;
-		snapping = false;
 		parsePlayer = null;
 		
 		// Set the state to uninitialized
 		state = STATE.UNINITIALIZED;
 	}
 	
-	// Reset the huddleIndex for a new play
+	/// <summary>
+	/// Resets the index for the 'huddle' into which initialized PlayerTokens are placed. Must be called before each 
+	///   play (but only needs to be called once for all playertokens).
+	/// </summary>
 	public static void newPlay() {
 		huddleIndex = 0;
 	}
-	
-	// Set various variables to default values to avoid unset variable issues
-	void Awake () {
-		// Set the animation to a random position, so players arn't perfectly in sync
-		defaultRotation = this.gameObject.transform.rotation;
-		running = false;
-		
-		// Set various default values
-		deInitialize();
-		
-		// Set up tags and the screen size
-		heightFactor = 20.0f / Screen.height;
-		this.gameObject.tag = "token";
-			
-		// Set up the huddle list
-		if(huddle == null){
-			huddle = new List<Vector3>();
-			huddle.Add (new Vector3( 0, -6, -1));
-			huddle.Add (new Vector3(-1, -7, -1));
-			huddle.Add (new Vector3(-1, -8, -1));
-			huddle.Add (new Vector3( 0, -9, -1));
-			huddle.Add (new Vector3( 1, -8, -1));
-			huddle.Add (new Vector3( 1, -7, -1));
-			huddle.Add (new Vector3( 1, -6, -1));
-			huddle.Add (new Vector3(-1, -6, -1));
-			huddle.Add (new Vector3( 1, -9, -1));
-			huddle.Add (new Vector3(-1, -9, -1));
-			huddle.Add (new Vector3( 0, -9, -1));
-		}
-	}
+
 
 	// Unity function for GUI updates, used to reposition pie menu
 	void OnGUI () {
-		menu.Center = menuTarget;	//Set the center point of the pie menu in every GUI draw.
-		menu.Run();					//This is the function, which will draw the pie on the GUI if it's Active. You can place it anywhere in the OnGUI function.
+		//Set the center point of the pie menu
+		menu.Center = menuTarget;
+		
+		// Draw the pie menu (if it's active)
+		menu.Run();
 	}
 
-	// FixedUpdate is called every physics frame (50 times/second)
+	// FixedUpdate is called every physics frame (50 times/second). Only to be used for calls that NEED to happen at
+	//   at a constant interval.
 	// Handles doubleclick tracking
 	void FixedUpdate() {
 		if (doubleClickCount > 0)
 			doubleClickCount--;
 		}
 	
-	// Update is called once per frame
+	// Update is called once per frame. Length of a frame can vary, so calls that require a constant interval should
+	//   go in FixedUpdate instead. Has better performance then FixedUpdate, so all other repeating calls go here.
 	void Update () {
+		// Initialize the token if it's ready for initialization
+		if (state == STATE.UNINITIALIZED && parsePlayer != null)
+			InitializeThreadsafe();
+		
 		// Compensate for animation drift
 		bigGuy.transform.localPosition = Vector3.zero;
 		
-		// Menu handling
+		// If the menu should be open, display it.
 		if (popMenu)
 		{
 			if (responsibilityMenu)
@@ -251,98 +273,41 @@ public class PlayerToken : MonoBehaviour {
 						showMenuMotioned();
 						break;
 					default:
+						// Due to time issues, unwanted doubleclicks may occasionally be processed while the user is in
+						//   the process of trying to move the token for a shift/motion. If so, we disregard that input
 						Debug.Log("Attempt to open menu in invalid state: " + state);
 						popMenu = false;
 						break;
 				}
 		}
-		
-		// Initialize the token if it's ready for initialization
-		if (state == STATE.UNINITIALIZED && parsePlayer != null)
-			InitializeThreadsafe();
-		else if (parsePlayer != null)
-			Debug.Log (state);
-	
-		// Handle snapping to grid. Target is determined on mouseUp (that is, when the user 'drops' the playerToken)
-		float distanceToTarget = Vector3.Distance(this.transform.position, target);
-		if (snapping && distanceToTarget > 0.001f) {
-			if (distanceToTarget > 0.005f)
-				this.transform.position = Vector3.MoveTowards (this.transform.position, 
-				                                               target,
-				                                               distanceToTarget / 0.005f);
-			else
-				this.transform.position = Vector3.MoveTowards (this.transform.position,
-				                                               target,
-				                                               distanceToTarget);
-		}
-		else { snapping = false; }
 	}
 	
-	void showMenuInitialized() {
+	// Display the menu (if the token is in the 'initalized' state)
+	private void showMenuInitialized() {
 		if (menuSpawnTime++ == 0)
 			menu.InitPie(PieMenuController.menuContentInitialized.ToArray());
 		else if (menuSpawnTime++ < 20)
+			// If the menu has been open for less then .4 seconds, we disregard input, to avoid unintended clicks
 			return;
 		else if (Input.GetMouseButtonDown(0)){
-			Debug.Log (menu.Selected);
-			if (menu.Selected == 0) { // "Add Shift" Selected
-				state = STATE.SHIFTING;
-				menu.Close ();
-				popMenu = false;
-			}
-			else if (menu.Selected == 1) {
-				state = STATE.MOTIONING;
-				menu.Close ();
-				popMenu = false;
-			}
-			else if (menu.Selected == 2) {
-				responsibilityMenu = true;
-				menuPage = 0;
-				menuSpawnTime = 1;
-				menu.TransitionPie(PieMenuController.menuContentResponsibility[menuPage].ToArray());
-			}
-			else if (menu.Selected == 3 && Input.GetMouseButtonDown(0)) {	// "Cancel" Selected
-				menu.Close();
-				popMenu = false;
-			}
-			else {
-				menu.CenterImageTint = Color.white;
-				menu.SelectedOptionTint = Color.black;
-			}
-		}
-	}
-
-	void showMenuShifted(){
-		if (menuSpawnTime++ == 0)
-			menu.InitPie(PieMenuController.menuContentShifted.ToArray());
-		else if (menuSpawnTime++ < 20)
-			return;
-		else if (Input.GetMouseButtonDown(0)){
-			Debug.Log ("Menu selected: " + menu.Selected);
-			switch (menu.Selected)
-			{
-				case 0:
+			switch (menu.Selected) {
+				case 0: // "Add Shift" selected
 					state = STATE.SHIFTING;
 					menu.Close ();
 					popMenu = false;
 					break;
-				case 1:
+				case 1: // "Add Motion" selected
 					state = STATE.MOTIONING;
 					menu.Close ();
 					popMenu = false;
 					break;
-				case 2:
+				case 2: // "Assign" selected
 					responsibilityMenu = true;
 					menuPage = 0;
 					menuSpawnTime = 1;
 					menu.TransitionPie(PieMenuController.menuContentResponsibility[menuPage].ToArray());
 					break;
-				case 3:
-					clearInput();
-					menu.Close ();
-					popMenu = false;
-					break;
-				case 4:
+				case 3: // "Cancel" selected
 					menu.Close();
 					popMenu = false;
 					break;
@@ -352,27 +317,69 @@ public class PlayerToken : MonoBehaviour {
 		}
 	}
 	
+	// Display the menu (if the token is in the 'shifted' state)
+	void showMenuShifted(){
+		if (menuSpawnTime++ == 0)
+			menu.InitPie(PieMenuController.menuContentShifted.ToArray());
+		else if (menuSpawnTime++ < 20)
+			// If the menu has been open for less then .4 seconds, we disregard input, to avoid unintended clicks
+			return;
+		else if (Input.GetMouseButtonDown(0)){
+			switch (menu.Selected)
+			{
+				case 0: // "Add Shift" selected
+					state = STATE.SHIFTING; 
+					menu.Close ();
+					popMenu = false;
+					break;
+				case 1: // "Add Motion" selected
+					state = STATE.MOTIONING;
+					menu.Close ();
+					popMenu = false;
+					break;
+				case 2: // "Assign" selected
+					responsibilityMenu = true;
+					menuPage = 0;
+					menuSpawnTime = 1;
+					menu.TransitionPie(PieMenuController.menuContentResponsibility[menuPage].ToArray());
+					break;
+				case 3: // "Clear Input" selected
+					clearInput();
+					menu.Close ();
+					popMenu = false;
+					break;
+				case 4: // "Cancel" selected
+					menu.Close();
+					popMenu = false;
+					break;
+				default:
+					break;
+			}
+		}
+	}
+	
+	// Display the menu (if the token is in the 'motioned' or 'responsible' state)
 	void showMenuMotioned(){
 		if (menuSpawnTime++ == 0)
 			menu.InitPie(PieMenuController.menuContentMotioned.ToArray());
 		else if (menuSpawnTime++ < 20)
+			// If the menu has been open for less then .4 seconds, we disregard input, to avoid unintended clicks
 			return;
 		else if (Input.GetMouseButtonDown(0)){
-			Debug.Log ("Menu selected: " + menu.Selected);
 			switch (menu.Selected)
 			{
-			case 0:
+			case 0: // "Assign" selected
 				responsibilityMenu = true;
 				menuPage = 0;
 				menuSpawnTime = 1;
 				menu.TransitionPie(PieMenuController.menuContentResponsibility[menuPage].ToArray());
 				break;
-			case 1:
+			case 1: // "Clear Input" selected
 				clearInput();
 				menu.Close ();
 				popMenu = false;
 				break;
-			case 2:
+			case 2: // "Cancel" selected
 				menu.Close();
 				popMenu = false;
 				break;
@@ -382,9 +389,14 @@ public class PlayerToken : MonoBehaviour {
 		}
 	}
 	
+	// Display the menu (if tthe user has selected 'assign' from the previous menus)
 	void showMenuResponsibility() {
+		// The current 'page' of responsibility icons (Since we have many more responsibilities then we could fit in
+		//   a single menu.
 		List<GUIContent> page = PieMenuController.menuContentResponsibility[menuPage];
+		
 		if (menuSpawnTime++ == 0)
+			// If the menu has been open for less then .4 seconds, we disregard input, to avoid unintended clicks
 			menu.TransitionPie(PieMenuController.menuContentResponsibility[menuPage].ToArray());
 		else if (menuSpawnTime++ < 20)
 			return;
@@ -413,7 +425,8 @@ public class PlayerToken : MonoBehaviour {
 		}
 	}
 	
-	// Function to clear input (Shifts, motion, and responsibility), called by pie menu (as well as by re-initializer?)
+	// Function to clear input (Shifts, motion, and responsibility). Called by the pie menu option "Clear Input",
+	//   as well as by DeInitialize
 	void clearInput() {
 		// Move back to the set location
 		this.transform.position = location;
@@ -448,12 +461,10 @@ public class PlayerToken : MonoBehaviour {
 		if (!shiftsSet)
 			state = STATE.INITIALIZED;
 		responsibilityMenu = false;
-		running = false;
 	}
 
 	// Called when the mouse button is pushed
 	void OnMouseDown() { 
-		Debug.Log ("Mouse down in " + state + ", Menu " + popMenu);
 		// Check if this click is the second click of a doubleclick, if so, we call the menu
 		if (doubleClickCount > 0) {
 			menuTarget = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
@@ -468,7 +479,6 @@ public class PlayerToken : MonoBehaviour {
 			return;
 		}
 		
-		
 		// If not a double click, start dragging the player
 		else {
 			Debug.Log ("Drag");
@@ -476,21 +486,19 @@ public class PlayerToken : MonoBehaviour {
 			startPoint = new Vector3 (this.transform.position.x,
                          this.transform.position.y,
                          this.transform.position.z);
-			snapping = false;
 			offset = new Vector3 (Input.mousePosition.x, Input.mousePosition.y, 0);
 			}
 		}
 	
 	// Called when the mouse is moved with the button down
 	void OnMouseDrag() {
+		// If the token can't be dragged, stop here
 		if (!checkDraggable())
 			return;
 			
 		Vector3 oldPos = transform.position;
 		// Move the token to it's new location, then reset the offset position to the new location
 		transform.Translate( (Input.mousePosition.x - offset.x) * heightFactor, (Input.mousePosition.y - offset.y) * heightFactor, 0);
-		
-		running = true;
 
 		// Reset the offset
 		offset.x = Input.mousePosition.x;
@@ -502,7 +510,6 @@ public class PlayerToken : MonoBehaviour {
 		// If we weren't dragging (Because we were not able to do so), do nothing
 		if (!checkDraggable())
 			return;
-		running = false;
 		
 		// Handle animation drift
 		bigGuy.transform.localPosition = Vector3.zero;
@@ -527,7 +534,7 @@ public class PlayerToken : MonoBehaviour {
 			}
 		}
 		
-		// If placement is valid, set snapping so update will move the token
+		// If placement is valid, smoothly slide the token into the closest grid square
 		this.gameObject.MoveTo (target,0.5f,0);
 
 		// Check to insure we actually moved (If not, THEN we set the doubleclick value)
@@ -554,6 +561,7 @@ public class PlayerToken : MonoBehaviour {
 		}
 	}
 	
+	// Save the changed location
 	private void relocate(Vector3 end){
 		location = end;
 	}
@@ -592,14 +600,20 @@ public class PlayerToken : MonoBehaviour {
 		state = STATE.MOTIONED;
 	}
 	
-	// Return a parseobject of the Player containing the user input values
+	/// <summary>
+	/// Return a parseobject of the Player containing the user input values
+	/// </summary>
+	/// <returns>A 'Player' class ParseObject representing the user's input for this player on the current play.</returns>
 	public ParseObject getInputParseObject(){
+		// Set up the ParseObject to be returned
 		ParseObject playerOut = new ParseObject("Player");
 		
+		// Create the internal datastructures for the playerOut object
 		float[] pLocation = new float[2];
 		float[] pMotion = new float[2];
 		List<float[]> pShifts = new List<float[]>();
 		
+		// Fill in the internal structures with the correct values
 		pLocation[0] = location.x;
 		pLocation[1] = location.y;
 		pMotion[0] = motion.x;
@@ -607,7 +621,7 @@ public class PlayerToken : MonoBehaviour {
 		foreach (Vector2 shift in shifts)
 			pShifts.Add (new float[2] {shift.x, shift.y});
 		
-		
+		// Assign variables to the ParseObject
 		playerOut["Abbreviation"] = abbreviation;
 		playerOut["Position"] = position;
 		playerOut["Location"] = pLocation;
@@ -619,12 +633,19 @@ public class PlayerToken : MonoBehaviour {
 		return playerOut;
 	}
 	
-	// Return a parseobject of the Player containing the correct values (The original ParseObject used for initialization)
+	/// <summary>
+	/// Return a "Player" class Parseobject of the Player containing the correct values (The original ParseObject used 
+	//   for initialization)
+	/// </summary>
+	/// <returns>The ParseObject used to initialize this player</returns>
 	public ParseObject getCorrectParseObject() {
 		return parsePlayer;
 	}
-	
-	// Animate the input play
+
+	/// <summary>
+	/// Animate the play (as input by the player)
+	/// </summary>
+	/// <returns>The length of the animation being played</returns>
 	public float AnimateInputPlay() {
 		// Move to the start of the path
 		this.gameObject.transform.rotation = defaultRotation;
@@ -773,6 +794,10 @@ public class PlayerToken : MonoBehaviour {
 		return delay;
 	}
 	
+	/// <summary>
+	/// Animates the play (using the correct values)
+	/// </summary>
+	/// <returns>The length of the animation being played.</returns>
 	public float AnimateCorrectPlay() {
 		// Move to the start of the path
 		this.gameObject.transform.rotation = defaultRotation;
@@ -907,20 +932,16 @@ public class PlayerToken : MonoBehaviour {
 	}
 	
 	// Helper functions for play animation
-	// Move the player token to the starting location
+	// Move the player token to the INPUT location
 	private void MoveToStart() {
 		this.transform.position = location;
 	}
+	
+	// Move the player token to the CORRECT starting location
 	private void MoveToCorrectStart() {
 		this.transform.position = correctLocation;
 	}
-	// Animate a Shift
-	// Animate the Motion
-	// Animate the Responsibility
-	// Set Idle the token for a given amount of time
-	private void AnimateIdle (float seconds, float delay) {
-		
-	}
+	
 	// Set the token animation to Running
 	private void SetAnimationRun () {
 		bigGuyAnimator.Play ("run_cycle");
@@ -931,14 +952,18 @@ public class PlayerToken : MonoBehaviour {
 		bigGuyAnimator.Play ("Idle");
 	}
 	
+	// Display the 'incorrect' skin (and play the incorrect noise) at the point in the play where the player's input
+	//   diverges from the 'correct' input
 	private void SetTokenIncorrect () {
 		bigGuyModel.GetComponent<SkinnedMeshRenderer>().material = ghostMaterial;
 	}
 	
+	// Reset the skin to the default skin
 	private void ClearTokenIncorrect () {
 		bigGuyModel.GetComponent<SkinnedMeshRenderer>().material = defaultMaterial;
 	}
 	
+	// Show/hide the input lines on the field
 	private void linesShow(bool visible) {
 		foreach(LineRenderer line in lines)
 		{

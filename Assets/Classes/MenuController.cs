@@ -47,28 +47,23 @@ public class MenuController : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
-		if (state == STATE.SPLASHSCREEN){
-			state = STATE.LOGIN;
-			ShowCanvas (loginCanvas);
-		}
-		if (state == STATE.LOGIN && login != null) {
-			CheckLogin ();
-		}
-		else if (state == STATE.LOADINGDB)
-			AnimateLoadingText();
-			
+	void Update () {	
 		switch (state) {
 			case STATE.SPLASHSCREEN:
 				state = STATE.LOGIN;
 				ShowCanvas (loginCanvas);
 				break;
 			case STATE.LOGIN:
-				CheckLogin ();
+				if (login != null)
+					CheckLogin ();
 				break;
 			case STATE.LOADINGDB:
 				AnimateLoadingText();
 				CheckDBLoaded();
+				break;
+			case STATE.INPLAY:
+			case STATE.POSTPLAY:
+				playNameText.text = gameController.playName;
 				break;
 			default:
 				break;
@@ -217,13 +212,13 @@ public class MenuController : MonoBehaviour {
 	public void AnimateCorrectPlay() {
 		DisableInPlayCanvas();
 		float delay = gameController.AnimateCorrectPlay();
-		Invoke ("EnableInPlayCanvas",delay);
+		Invoke ("EnableInPlayCanvas",delay+1f);
 	}
 	
 	public void AnimateInputPlay() {
 		DisableInPlayCanvas();
 		float delay = gameController.AnimateInputPlay();
-		Invoke ("EnableInPlayCanvas",delay);
+		Invoke ("EnableInPlayCanvas",delay+1f);
 	}
 	
 	private void ShowInPlayButtons() {
