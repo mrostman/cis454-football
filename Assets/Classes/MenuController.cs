@@ -3,7 +3,7 @@ using System.Collections;
 using Parse;
 
 public class MenuController : MonoBehaviour {
-	private enum STATE {SPLASHSCREEN, LOGIN, MAINMENU, LOADINGDB, INPLAY, POSTPLAY}; 
+	private enum STATE {SPLASHSCREEN, LOGIN, MAINMENUPLAYER, MAINMENUSTAFF, LOADINGDB, INPLAY, POSTPLAY}; 
 	private STATE state = STATE.SPLASHSCREEN;
 	
 	[Header("Other Controllers")]
@@ -23,7 +23,12 @@ public class MenuController : MonoBehaviour {
 	private int loadingDotCount = 0;
 	
 	[Header("Main Menu")]
-	public CanvasGroup mainMenuCanvas;
+	public CanvasGroup mainMenuCanvasStaff;
+	public CanvasGroup mainMenuCanvasPlayer;
+	public UnityEngine.UI.Text playerMenuText, playerMenuQuitButtonText;
+	public UnityEngine.UI.Button playerMenuQuitButton, staffMenuQuitButton;
+	//public UnityEngine.UI.Button staffPlayerSwitchButon;
+	private bool isStaff = false;
 	private System.Threading.Tasks.Task<ParseUser> login = null;
 	
 	[Header("In-Play Menu")]
@@ -110,13 +115,33 @@ public class MenuController : MonoBehaviour {
 			Debug.Log("Logged in!");
 			databaseController.GetPlays();
 			HideCanvas (loginCanvas);
-			ShowCanvas (mainMenuCanvas);
-			state = STATE.MAINMENU;
+			
+			Parse.ParseUser.CurrentUser.TryGetValue("Staff", out isStaff);
+			ShowMainMenu();
 		}
 		
 		// Check for unexpected cases
 		else
 			Debug.LogError("Unknown login status: " + login.Result);
+	}
+	
+	//Display the main menu, called from logging in or from quitting from other modes.
+	private void ShowMainMenu () {
+		if (isStaff) {
+			state = STATE.MAINMENUSTAFF;
+			ShowCanvas (mainMenuCanvasStaff);
+			playerMenuText.text = "Player Mode";
+			playerMenuQuitButtonText.text = "Back";
+			
+			// TODO: Disable the 'quit' button if on a platform where the application ending itself is not supported
+			#if UNITY_IPHONE
+				Debug.Log("Iphone");
+			#endif
+		}
+		else {
+			state = STATE.MAINMENUPLAYER;
+			ShowCanvas (mainMenuCanvasPlayer);
+		}
 	}
 	
 	// Animate the text on the loading panel
@@ -157,7 +182,7 @@ public class MenuController : MonoBehaviour {
 	// Attempt to start a play
 	public void TryStartPlay() {
 		// Hide the main menu
-		HideCanvas(mainMenuCanvas);
+		HideCanvas(mainMenuCanvasPlayer);
 		
 		// If the tatabase is loaded, start the play
 		if (DatabaseController.databaseLoaded){
