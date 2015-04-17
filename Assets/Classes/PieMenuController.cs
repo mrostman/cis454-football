@@ -8,11 +8,16 @@ public class PieMenuController : MonoBehaviour {
 	public static List<GUIContent> menuContentShifted;
 	public static List<GUIContent> menuContentMotioned;
 	public static List<List<GUIContent>> menuContentResponsibility;
+	public static List<GUIContent> menuContentEditMode;
 	
 	public List<GUIContent> iMenuContentInitialized;
 	public List<GUIContent> iMenuContentShifted;
 	public List<GUIContent> iMenuContentMotioned;
 	public List<GUIContent> iMenuContentResponsibility;
+	public List<GUIContent> imenuContentEditMode;
+	
+	public static MenuController menuController;
+	public MenuController iMenuController;
 	
 	public GUIContent back, next;
 	
@@ -23,7 +28,8 @@ public class PieMenuController : MonoBehaviour {
 		menuContentInitialized = iMenuContentInitialized;
 		menuContentShifted = iMenuContentShifted;
 		menuContentMotioned = iMenuContentMotioned;
-		
+		menuContentEditMode = imenuContentEditMode;
+		menuController = iMenuController;
 	}
 	
 	private List<List<GUIContent>> Partition() {

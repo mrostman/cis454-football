@@ -5,6 +5,8 @@ Project("{B70394C4-486D-65CC-9811-54E10FEFB65F}") = "cis454-football", "Assembly
 EndProject
 Project("{B70394C4-486D-65CC-9811-54E10FEFB65F}") = "cis454-football", "Assembly-CSharp.csproj", "{573A0BB0-9D59-3DF8-CC4F-3F6053461EF1}"
 EndProject
+Project("{B70394C4-486D-65CC-9811-54E10FEFB65F}") = "cis454-football", "Assembly-CSharp-Editor.csproj", "{B5CA0D60-0BEF-EFDA-9AD0-D02FF1ED754C}"
+EndProject
 Project("{B70394C4-486D-65CC-9811-54E10FEFB65F}") = "cis454-football", "Assembly-UnityScript-firstpass.unityproj", "{6DC62CF8-9F15-5D89-2378-C6EB4A2C6D7B}"
 EndProject
 Project("{B70394C4-486D-65CC-9811-54E10FEFB65F}") = "cis454-football", "Assembly-UnityScript.unityproj", "{4FFAD24A-A9A8-288B-DD60-2924C9545D4D}"
@@ -23,6 +25,10 @@ Global
 		{573A0BB0-9D59-3DF8-CC4F-3F6053461EF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{573A0BB0-9D59-3DF8-CC4F-3F6053461EF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{573A0BB0-9D59-3DF8-CC4F-3F6053461EF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5CA0D60-0BEF-EFDA-9AD0-D02FF1ED754C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5CA0D60-0BEF-EFDA-9AD0-D02FF1ED754C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5CA0D60-0BEF-EFDA-9AD0-D02FF1ED754C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5CA0D60-0BEF-EFDA-9AD0-D02FF1ED754C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6DC62CF8-9F15-5D89-2378-C6EB4A2C6D7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6DC62CF8-9F15-5D89-2378-C6EB4A2C6D7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DC62CF8-9F15-5D89-2378-C6EB4A2C6D7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -35,7 +41,7 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-																																																																																GlobalSection(MonoDevelopProperties) = preSolution
+																																																																																						GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Assembly-CSharp.csproj
 		Policies = $0
 		$0.TextStylePolicy = $1

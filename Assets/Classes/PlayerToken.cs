@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections; 
 using System.Collections.Generic;
+using System.Linq;
 using Parse;
 
 [RequireComponent(typeof(BoxCollider))]
@@ -9,6 +10,8 @@ using Parse;
 public class PlayerToken : MonoBehaviour {
 	// State (For determining how to respond based on what input has already been recieved)
 	private enum STATE {UNAWAKE, UNINITIALIZED, INITIALIZED, SHIFTING, SHIFTED, MOTIONING, MOTIONED, RESPONSIBLE};
+	public static bool editMode = false;
+	public static bool propertiesMenu = false;
 	private STATE state = STATE.UNAWAKE;
 	private bool shiftsSet;
 	private bool motionSet;
@@ -34,10 +37,11 @@ public class PlayerToken : MonoBehaviour {
 	private static List<Vector3> huddle;// Locations to put player tokens initially (in the huddle)
 	private static int huddleIndex;		// Locations in the huddle to put the next player token
 	
-	// Setup variables (set only at initialization)
+	// Setup variables
 	public bool controllable;			// Is the token controllable by the player?
-	private string abbreviation;		// Abbreviation for the player's position
-	private string position;			// Name of the player's position
+	public bool saveControllable;		// For edit mode: Should the token be saved as controllable?
+	public string abbreviation;		// Abbreviation for the player's position
+	public string position;			// Name of the player's position
 	
 	// Assigned variables (The 'correct' input)
 	public Vector3 correctLocation;		// Location of the token
@@ -121,6 +125,11 @@ public class PlayerToken : MonoBehaviour {
 		parsePlayer = iParsePlayer;
 	}
 	
+	public void InitializeEditMode(ParseObject iParsePlayer){
+		editMode = true;
+		Initialize(iParsePlayer);
+	}
+	
 	// Private method to handle the actual initialization on the next update after Initialize is called.
 	// Necessary due to Unity's threading restrictions.
 	private void InitializeThreadsafe()
@@ -158,21 +167,27 @@ public class PlayerToken : MonoBehaviour {
 		if (!parsePlayer.TryGetValue("Position"    , 	out position    )) 	{ position = ""; }
 		if (!parsePlayer.TryGetValue("Responsib", 		out correctResponsibility)){ correctResponsibility = null; }
 		
+		// If we're in edit mode, make the token controllable (but make it save it's controllableness to the loaded value)
+		if (editMode) {
+			saveControllable = controllable;
+			controllable = true;
+		}
+		
 		// Set token to display the player's abbreviation
 		displayText.text = abbreviation;
 		
-		// If the token is not controllable, set it to it's 'correct' values
-		if (!controllable) {
+		// If the token is not controllable, or we're in edit mode, set it to it's 'correct' values
+		if (!controllable || editMode) {
 			location = correctLocation;
 			motion = correctMotion;
 			shifts = correctShifts;
 			responsibility = correctResponsibility;
 			correctMaxShifts = System.Math.Max(correctMaxShifts, shifts.Count);
 		}
-		
 		// Otherwise set it to the 'blank' starting values. (A 'controllable' token is one where the user is expected
 		//   to provide the correct values.
 		else {
+			Debug.Log ("editMode: " + editMode + ", Controllable: " + controllable);
 			location = huddle[huddleIndex++];
 			shifts = new List<Vector2>();
 			motion = new Vector2(0,0);
@@ -190,6 +205,9 @@ public class PlayerToken : MonoBehaviour {
 	/// De-Initialize the PlayerToken, scrubbing it of any user input and readying it to be re-initialized with new data
 	/// </summary>
 	public void deInitialize() {
+		// Clear editMode
+		editMode = false;
+	
 		// Set up the line renderers
 		lineIndex = 0;
 		lines = new List<LineRenderer>();
@@ -248,6 +266,9 @@ public class PlayerToken : MonoBehaviour {
 	// Update is called once per frame. Length of a frame can vary, so calls that require a constant interval should
 	//   go in FixedUpdate instead. Has better performance then FixedUpdate, so all other repeating calls go here.
 	void Update () {
+		// Update the text
+		displayText.text = abbreviation;
+		
 		// Initialize the token if it's ready for initialization
 		if (state == STATE.UNINITIALIZED && parsePlayer != null)
 			InitializeThreadsafe();
@@ -282,10 +303,17 @@ public class PlayerToken : MonoBehaviour {
 		}
 	}
 	
+	public void ClosePropertiesMenu() {
+		propertiesMenu = false;
+	}
+	
 	// Display the menu (if the token is in the 'initalized' state)
 	private void showMenuInitialized() {
 		if (menuSpawnTime++ == 0)
-			menu.InitPie(PieMenuController.menuContentInitialized.ToArray());
+			if (editMode)
+				menu.InitPie(PieMenuController.menuContentInitialized.Concat(PieMenuController.menuContentEditMode).ToArray());
+			else
+				menu.InitPie(PieMenuController.menuContentInitialized.ToArray());
 		else if (menuSpawnTime++ < 20)
 			// If the menu has been open for less then .4 seconds, we disregard input, to avoid unintended clicks
 			return;
@@ -311,6 +339,12 @@ public class PlayerToken : MonoBehaviour {
 					menu.Close();
 					popMenu = false;
 					break;
+				case 4:
+					PieMenuController.menuController.ShowPlayerProperties(this);
+					menu.Close ();
+					propertiesMenu = true;
+					popMenu = false;
+					break;
 				default:
 					break;
 			}
@@ -320,7 +354,10 @@ public class PlayerToken : MonoBehaviour {
 	// Display the menu (if the token is in the 'shifted' state)
 	void showMenuShifted(){
 		if (menuSpawnTime++ == 0)
-			menu.InitPie(PieMenuController.menuContentShifted.ToArray());
+			if (editMode)
+				menu.InitPie(PieMenuController.menuContentShifted.Concat(PieMenuController.menuContentEditMode).ToArray());
+			else
+				menu.InitPie(PieMenuController.menuContentShifted.ToArray());
 		else if (menuSpawnTime++ < 20)
 			// If the menu has been open for less then .4 seconds, we disregard input, to avoid unintended clicks
 			return;
@@ -361,7 +398,10 @@ public class PlayerToken : MonoBehaviour {
 	// Display the menu (if the token is in the 'motioned' or 'responsible' state)
 	void showMenuMotioned(){
 		if (menuSpawnTime++ == 0)
-			menu.InitPie(PieMenuController.menuContentMotioned.ToArray());
+			if (editMode)
+				menu.InitPie(PieMenuController.menuContentMotioned.Concat(PieMenuController.menuContentEditMode).ToArray());
+			else
+				menu.InitPie(PieMenuController.menuContentMotioned.ToArray());
 		else if (menuSpawnTime++ < 20)
 			// If the menu has been open for less then .4 seconds, we disregard input, to avoid unintended clicks
 			return;
@@ -448,7 +488,7 @@ public class PlayerToken : MonoBehaviour {
 	
 	// Helper function to determine if it should currently be possible to drag the token
 	private bool checkDraggable() {
-		if (state == STATE.UNINITIALIZED || state == STATE.SHIFTED || state == STATE.MOTIONED || state == STATE.RESPONSIBLE || !controllable) {
+		if (state == STATE.UNINITIALIZED || state == STATE.SHIFTED || state == STATE.MOTIONED || state == STATE.RESPONSIBLE || !controllable || propertiesMenu) {
 		    return false;
 		}
 		return true;
@@ -518,7 +558,12 @@ public class PlayerToken : MonoBehaviour {
 		target = new Vector3 (Mathf.Round (this.transform.position.x), Mathf.Round (this.transform.position.y), this.transform.position.z);
 		
 		// Check for invalid placement (outside of offensive side of the field of play)
-		if (Mathf.Abs (target.x) > maxX || target.y > -1 || target.y < maxY) {
+		if (editMode && (Mathf.Abs (target.x) > maxX || target.y > maxY * -1f || target.y < maxY)) {
+			transform.position = startPoint;
+			rollbackState();
+			return;
+		}
+		else if (Mathf.Abs (target.x) > maxX || target.y > -1 || target.y < maxY) {
 			transform.position = startPoint;
 			rollbackState();
 			return;
@@ -530,7 +575,7 @@ public class PlayerToken : MonoBehaviour {
 			if (token != this.gameObject && Vector3.Distance(target, token.transform.position) < 0.01f) {
 				transform.position = startPoint;
 				rollbackState();
-				return;
+				return; 
 			}
 		}
 		
@@ -627,6 +672,8 @@ public class PlayerToken : MonoBehaviour {
 		playerOut["Location"] = pLocation;
 		playerOut["Motion"] = pMotion;
 		playerOut["Shifts"] = pShifts;
+		if (editMode)
+			playerOut["Controllable"] = saveControllable;
 		if (responsibility != null)
 			playerOut["Responsib"] = ParseObject.CreateWithoutData("Responsibility", responsibility.ObjectId);
 		
