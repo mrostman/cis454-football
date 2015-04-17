@@ -5,6 +5,8 @@ Project("{B70394C4-486D-65CC-9811-54E10FEFB65F}") = "cis454-football", "Assembly
 EndProject
 Project("{B70394C4-486D-65CC-9811-54E10FEFB65F}") = "cis454-football", "Assembly-CSharp-vs.csproj", "{573A0BB0-9D59-3DF8-CC4F-3F6053461EF1}"
 EndProject
+Project("{B70394C4-486D-65CC-9811-54E10FEFB65F}") = "cis454-football", "Assembly-CSharp-Editor-vs.csproj", "{B5CA0D60-0BEF-EFDA-9AD0-D02FF1ED754C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,11 +21,15 @@ Global
 		{573A0BB0-9D59-3DF8-CC4F-3F6053461EF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{573A0BB0-9D59-3DF8-CC4F-3F6053461EF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{573A0BB0-9D59-3DF8-CC4F-3F6053461EF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5CA0D60-0BEF-EFDA-9AD0-D02FF1ED754C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5CA0D60-0BEF-EFDA-9AD0-D02FF1ED754C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5CA0D60-0BEF-EFDA-9AD0-D02FF1ED754C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5CA0D60-0BEF-EFDA-9AD0-D02FF1ED754C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-																																																																																		GlobalSection(MonoDevelopProperties) = preSolution
+																																																																																							GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Assembly-CSharp.csproj
 		Policies = $0
 		$0.TextStylePolicy = $1

@@ -74,6 +74,8 @@
      <None Include="Assets\Standard Assets (Mobile)\Shaders\Lightmap Shaders (Legacy)\Mobile Lightmap Only.shader" />
      <None Include="Assets\Standard Assets (Mobile)\Shaders\Lightmap Shaders (Legacy)\Mobile Lightmap AlphaTest.shader" />
      <None Include="Assets\Parse.Unity.xml" />
+     <None Include="Assets\Editor\Doxygen\Resources\BaseDoxyfile.txt" />
+     <None Include="Assets\Editor\Doxygen\ReadMe.txt" />
      <None Include="Assets\Pie Menu\Skins\MetroPie\Icons\Metro Icon Set.txt" />
      <None Include="Assets\Pie Menu\PieMenu (Legacy v1.0).txt" />
  <Reference Include="Assembly-UnityScript-firstpass">

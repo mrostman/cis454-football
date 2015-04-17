@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 using Parse;
 
 public class MenuController : MonoBehaviour {
-	private enum STATE {SPLASHSCREEN, LOGIN, MAINMENUPLAYER, MAINMENUSTAFF, LOADINGDB, INPLAY, POSTPLAY}; 
+	private enum STATE {SPLASHSCREEN, LOGIN, MAINMENUPLAYER, MAINMENUSTAFF, LOADINGDB, INPLAY, POSTPLAY, EDIT, PLAYEDITORMENU}; 
 	private STATE state = STATE.SPLASHSCREEN;
 	
 	[Header("Other Controllers")]
@@ -19,8 +21,8 @@ public class MenuController : MonoBehaviour {
 	[Header("Loading Menu")]
 	public CanvasGroup loadingCanvas;
 	public UnityEngine.UI.Text loadingText;
-	private int loadingAnimCount = 0;
-	private int loadingDotCount = 0;
+	private int animCount = 0;
+	private int dotCount = 0;
 	
 	[Header("Main Menu")]
 	public CanvasGroup mainMenuCanvasStaff;
@@ -30,6 +32,29 @@ public class MenuController : MonoBehaviour {
 	//public UnityEngine.UI.Button staffPlayerSwitchButon;
 	private bool isStaff = false;
 	private System.Threading.Tasks.Task<ParseUser> login = null;
+	
+	[Header("Play Editor")]
+	public CanvasGroup selectExistingPlayCanvas, playerPropertiesCanvas, editModeCanvas;
+	public GameObject scrollPanel;
+	public GameObject pButton;
+	public InputField playerPositionText, playerAbbreviationText, playNameField;
+	public Toggle playerControllableToggle;
+	public UnityEngine.UI.Button rootButton;
+	private PlayerToken tokenBeingEdited;
+	private enum EDITTYPE {BLANK, FROMEXISTING, EDITEXISTING};
+	private EDITTYPE editType;
+	private bool playListNeedsUpdate = true;
+	private List<GameObject> playButtons = new List<GameObject>();
+	private string editPlayID;
+	private string editPlayIDBlank;
+	
+	[Header("Play Editor Error")] 
+	public CanvasGroup editorErrorCanvas;
+	public Text editorErrorText;
+	
+	[Header("Saving Notification")]
+	public CanvasGroup savingAnimCanvas;
+	public Text savingText;
 	
 	[Header("In-Play Menu")]
 	public CanvasGroup inPlayCanvas;
@@ -41,18 +66,30 @@ public class MenuController : MonoBehaviour {
 	private Vector3 postPlayPanelHide = new Vector3(0f, 70f, 0f);
 	private bool postPlayPanelHidden = false;
 	
-	[Header("Play Editor")]
-	public UnityEngine.UI.InputField playNameInput;
+	private List<CanvasGroup> canvases = new List<CanvasGroup>();
+	
 
 	// Use this for initialization
 	void Start () {
 		HideInPlayButtons();
 		HidePostPlayButtons();
-	
+		
+		// Setup list of canvases
+		canvases.Add(loginCanvas);
+		canvases.Add(loadingCanvas);
+		canvases.Add(mainMenuCanvasStaff);
+		canvases.Add(mainMenuCanvasPlayer);
+		canvases.Add(selectExistingPlayCanvas);
+		canvases.Add(playerPropertiesCanvas);
+		canvases.Add(editorErrorCanvas);
+		canvases.Add(savingAnimCanvas);
+		canvases.Add(inPlayCanvas);
+		canvases.Add(editModeCanvas);
 	}
 	
 	// Update is called once per frame
-	void Update () {	
+	void Update () {
+		AnimateText();
 		switch (state) {
 			case STATE.SPLASHSCREEN:
 				state = STATE.LOGIN;
@@ -63,32 +100,60 @@ public class MenuController : MonoBehaviour {
 					CheckLogin ();
 				break;
 			case STATE.LOADINGDB:
-				AnimateLoadingText();
 				CheckDBLoaded();
 				break;
 			case STATE.INPLAY:
 			case STATE.POSTPLAY:
 				playNameText.text = gameController.playName;
 				break;
+			case STATE.PLAYEDITORMENU:
+				Debug.Log ("Test");
+				break;
 			default:
 				break;
 		}
-
+		if (playListNeedsUpdate == true && DatabaseController.databaseLoaded) {
+			playListNeedsUpdate = false;
+			GeneratePlayListButtons ();
+		}
 	}
 	
 	// Show a given canvas (menu)
-	private void ShowCanvas(CanvasGroup canvas){
+	public void ShowCanvas(CanvasGroup canvas){
 		canvas.alpha = 1f;
 		canvas.interactable = true;
 		canvas.blocksRaycasts = true;
 	}
 	
 	// Hide a given canvas (menu)s
-	private void HideCanvas(CanvasGroup canvas) {
+	public void HideCanvas(CanvasGroup canvas) {
 		canvas.alpha = 0f;
 		canvas.interactable = false;
 		canvas.blocksRaycasts = false;
 	}
+	
+	public void HideAll(){
+		foreach (CanvasGroup c in canvases)
+			HideCanvas (c);
+	}
+	
+	private void GeneratePlayListButtons() {
+		// Setup first button
+		pButton.GetComponentInChildren<Text>().text = databaseController.playQueryResults[0].Get<string>("Name");
+		playButtons.Add (pButton);
+		
+		// Setup remaining buttons
+		for(int i = 1; i < databaseController.playQueryResults.Count; i++){
+			GameObject newButton = (GameObject)Instantiate (pButton);
+			newButton.transform.parent = rootButton.transform.parent;
+			newButton.transform.localPosition = rootButton.transform.localPosition - new Vector3(0, 15f * i, 0);
+			newButton.transform.localScale = rootButton.transform.localScale;
+			Text texty = newButton.GetComponentInChildren<Text>();
+			texty.text = databaseController.playQueryResults[i].Get<string>("Name");
+			playButtons.Add (newButton);
+		}
+	}
+
 	
 	// Check if the login attempt has succeeded or failed
 	private void CheckLogin() {
@@ -126,7 +191,8 @@ public class MenuController : MonoBehaviour {
 	}
 	
 	//Display the main menu, called from logging in or from quitting from other modes.
-	private void ShowMainMenu () {
+	public void ShowMainMenu () {
+		HideAll();
 		if (isStaff) {
 			state = STATE.MAINMENUSTAFF;
 			ShowCanvas (mainMenuCanvasStaff);
@@ -145,27 +211,29 @@ public class MenuController : MonoBehaviour {
 	}
 	
 	// Animate the text on the loading panel
-	private void AnimateLoadingText() {
-		if (loadingAnimCount > 50){
-			if (loadingDotCount == 3){
+	private void AnimateText() {
+		if (animCount > 50){
+			if (dotCount == 3){
 				loadingText.text = "Loading";
-				loadingDotCount = 0;
+				savingText.text = "Saving";
+				dotCount = 0;
 			}
 			else {
 				loadingText.text = loadingText.text + ".";
-				loadingDotCount++;
+				savingText.text = savingText.text + ".";
+				dotCount++;
 			}
-			loadingAnimCount = 0;
+			animCount = 0;
 		}
 		else
-			loadingAnimCount++;		
+			animCount++;		
 	}
 	
 	// Check if the database has been loaded yet (used by loading screen)
 	private void CheckDBLoaded() {
 		if (!DatabaseController.databaseLoaded)
 			return;
-		else 
+		else
 			StartPlay ();
 	}
 
@@ -198,10 +266,29 @@ public class MenuController : MonoBehaviour {
 		}
 	}
 	
+	public void StartEdit(Text playNameText) {
+		// Change the state
+		state = STATE.EDIT;
+		
+		// Set the gameController's editMode to true
+		gameController.editMode = true;
+		
+		// TODO: Bring up the play editor UI
+		
+		// Have the gamecontroller start a new play
+		gameController.EditPlay (playNameText.text);
+		
+		// Display the play name
+		playNameText.text = gameController.playName;
+	}
+	
 	// Start a play
 	private void StartPlay() {
 		// Change the state
 		state = STATE.INPLAY;
+		
+		// Set the gameController's editMode to false
+		gameController.editMode = false;
 		
 		// Bring up the in-play UI
 		HideCanvas (loadingCanvas);
@@ -232,6 +319,11 @@ public class MenuController : MonoBehaviour {
 			correctnessText.text = "Your Score: Incorrect";
 		else
 			correctnessText.text = "Your Score: Correct!";
+	}
+	
+	public void ShowSelectPlayPanel() {
+		HideCanvas (mainMenuCanvasStaff);
+		ShowCanvas (selectExistingPlayCanvas);
 	}
 	
 	public void AnimateCorrectPlay() {
@@ -273,13 +365,46 @@ public class MenuController : MonoBehaviour {
 		inPlayCanvas.interactable = true;
 	}
 	
-	//TODO: Temporary Play Editor
-	public void StartEditPlay() {
-		gameController.StartEditPlay();
+	// Play Editor Functions
+	public void SelectParentPlay(GameObject playNameButton) {
+		//playNameButton = 
+	}
+	public void StartPlayMode() {}
+	public void ShowPlayerProperties(PlayerToken token) {
+		tokenBeingEdited = token;
+		playerPositionText.text = token.position;
+		playerAbbreviationText.text = token.abbreviation;
+		playerControllableToggle.isOn = token.saveControllable;
+		ShowCanvas (playerPropertiesCanvas);
+	}
+	public void SavePlayerPosition() {
+		tokenBeingEdited.position = playerPositionText.text;
 	}
 	
-	public void SavePlay() {
-		gameController.SaveThisPlay(playNameInput.text);
+	public void SavePlayerAbbreviation() {
+		tokenBeingEdited.abbreviation = playerAbbreviationText.text;
+	}
+	
+	public void SavePlayerControllable() {
+		tokenBeingEdited.saveControllable = playerControllableToggle.isOn;
+		
 	}
 
+	public void ClosePlayerProperties() {
+		PlayerToken.propertiesMenu = false;
+	}
+	
+	public void SaveError(string errorText) {
+		editorErrorText.text = errorText;
+		ShowCanvas (editorErrorCanvas);
+	}
+	
+	public void TrySaveEdit() {
+		gameController.TrySaveEdit(playNameField.text);
+	}
+	
+	public void CancelEdit() {
+		gameController.EndEdit();
+		ShowMainMenu();
+	}
 }

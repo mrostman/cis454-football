@@ -5,17 +5,23 @@ using Parse;
 
 public class GameController : MonoBehaviour {
 	// State handler
-	public enum STATE {INACTIVE, LOADING, LOADED, SETUP, INPLAY, POSTPLAY};
+	public enum STATE {INACTIVE, LOADING, LOADED, SETUP, INPLAY, POSTPLAY, SAVING};
 	public STATE state = STATE.INACTIVE;
+	public bool editMode = false;
 
 	// Player Tokens
 	public List<PlayerToken> offensiveTeam;
 	public List<PlayerToken> defensiveTeam;
 	public DatabaseController databaseController;
+	
+	// For edit mode
+	public int existingCount = -1;
+	private string playNameToSave;
 
 	// Variables for keeping track of the current play
 	private ParseObject currentPlay;
 	private string currentPlayID;
+	private string editPlayName;
 	
 	public System.DateTime playLastSeen;
 	public string playName;
@@ -24,6 +30,8 @@ public class GameController : MonoBehaviour {
 
 	Queue playsToUpdate = new Queue ();
 	Queue userPlaysToUpload = new Queue ();
+	
+	public MenuController menuController;
 
 	// Use this for initialization
 	void Start () {
@@ -31,6 +39,13 @@ public class GameController : MonoBehaviour {
 	}
 	
 	public void testFunc() { Debug.Log("Test"); }
+	
+	// Special NewPlay method for editplay
+	public void EditPlay (string playName) {
+		editMode = true;
+		editPlayName = playName;
+		NewPlay ();
+	}
 
 	// called when a new round of gameplay begins
 	public void NewPlay () {
@@ -44,14 +59,21 @@ public class GameController : MonoBehaviour {
 			defensiveTeam[i].deInitialize();
 		}
 		PlayerToken.newPlay ();
+		PlayerToken.editMode = editMode;
 		
 		// TODO: Statement to make DBController load the play here
 
-		// Select the next play to be displayed
-		currentPlay = databaseController.SelectPlay ();
-		
-		// Load the full contents of the selected play from the database
-		databaseController.loadPlay(currentPlay.ObjectId);
+		// Select the next play to be displayed, and load it from the database. Or, if in edit mode, load the play to edit
+		if (editMode) {
+			if (editPlayName == null)
+				databaseController.loadPlayByName ("BLANK");
+			else
+				databaseController.loadPlayByName (editPlayName);
+		}
+		else {
+			currentPlay = databaseController.SelectPlay ();
+			databaseController.loadPlay(currentPlay.ObjectId);
+		}
 		state = STATE.LOADING;
 	}
 	
@@ -134,7 +156,68 @@ public class GameController : MonoBehaviour {
 			delay = oPlayer.AnimateInputPlay();
 		return delay;
 	}
+
 	
+	public void TrySaveEdit(string playName) {
+		Debug.Log ("TrySaveEditCalled");
+		playNameToSave = playName;
+		databaseController.checkPlayExists(playName);
+		state = STATE.SAVING;
+	}
+	
+	private void SaveEditFail() {
+		menuController.SaveError ("Unable to save play: Play with name \"" + playNameToSave + "\" already exists. " +
+								  "Choose a new name and try again.");
+		state = STATE.INPLAY;
+	}
+	
+	private void SaveEdit() {
+		state = STATE.INPLAY;
+		Debug.Log ("SaveEditCalled");
+		ParseObject newPlay = new ParseObject("Play");
+		ParseObject oTeam = new ParseObject("OffensiveTeam");
+		ParseObject dTeam = new ParseObject("DefensiveTeam");
+		
+		for (int i = 0; i < 11; i++) 
+		{
+			ParseObject oPlayer = offensiveTeam[i].getInputParseObject();
+			ParseObject dPlayer = defensiveTeam[i].getInputParseObject();
+			
+			string fieldName = "Player" + i;
+			
+			oTeam.Add(fieldName, oPlayer);
+			dTeam.Add(fieldName, dPlayer);
+		}
+		
+		newPlay["Name"] = playNameToSave;
+		//newPlay["Parent"] = ParseObject.CreateWithoutData("Play", currentPlayID);
+		newPlay["OffensiveTeam"] = oTeam;
+		newPlay["DefensiveTeam"] = dTeam;
+		
+		newPlay.SaveAsync().ContinueWith( t => { Debug.Log("SAVED: " + t.Exception); }); ;
+		
+		// TODO: Switch over to que-based updating
+		//playsToUpdate.Enqueue (newPlay);
+		EndEdit();
+	}
+	
+	public void ExistingFound(int found) {
+		Debug.Log ("ExistingFoundCalled" + found + state);
+		existingCount = found;
+	}
+	
+	// End edit mode, cleaning up and scrubbing the player tokens
+	public void EndEdit() {
+		foreach(PlayerToken token in offensiveTeam)
+			token.deInitialize();
+		foreach(PlayerToken token in defensiveTeam)
+			token.deInitialize();
+		PlayerToken.editMode = false;
+		editMode = false;
+		state = STATE.INACTIVE;
+
+		menuController.ShowMainMenu();
+	}
 
 	// Called at the end of gameplay of each play to grade the play, animate the results, and save them
 	public int EndPlay () {
@@ -348,37 +431,39 @@ public class GameController : MonoBehaviour {
 	{
 		
 	}
-
+	
 	// Update is called once per frame
 	//   Begins setting up the play once it has been loaded
 	void Update () {
-		if (state == STATE.LOADED) {
+		if (state == STATE.LOADED && !editMode){
 			state = STATE.SETUP;
 			SetupNewPlay();
+		}
+		else if (state == STATE.LOADED){
+			state = STATE.SETUP;
+			SetupNewPlay();
+		}
+		switch (state) {
+			case STATE.LOADED:
+				state = STATE.SETUP;
+				SetupNewPlay();
+				break;
+			case STATE.SAVING:
+				if (existingCount == 0)
+					SaveEdit();
+				else if (existingCount > 0)
+					SaveEditFail();
+				break;
+			default:
+				break;
 		}
 	}
 	
 	
 	// TODO: Temporary play editor functions
 	public void StartEditPlay() {
-		for (int i = 0; i < 11; i++) {
-			offensiveTeam[i].controllable = true;
-			defensiveTeam[i].controllable = true;
-		}
+		editMode = true;
 	}
-	public void SaveThisPlay(string playName) {
-		ParseObject newPlay = new ParseObject("Play");
-		ParseObject newOffensiveTeam = new ParseObject("OffensiveTeam");
-		ParseObject newDefensiveTeam = new ParseObject("DefensiveTeam");
-		for(int i = 0; i < 11; i++) {
-			string playerName = "Player" + i;
-			newOffensiveTeam.Add (playerName, offensiveTeam[i].getInputParseObject());
-			newDefensiveTeam.Add (playerName, defensiveTeam[i].getInputParseObject());
-		}
-		newPlay["OffensiveTeam"] = newOffensiveTeam;
-		newPlay["DefensiveTeam"] = newDefensiveTeam;
-		newPlay["Name"] = playName;
-		
-		newPlay.SaveAsync(); 
-	}
+
+
 }
