@@ -66,7 +66,7 @@ public class MenuController : MonoBehaviour {
 	private Vector3 postPlayPanelHide = new Vector3(0f, 70f, 0f);
 	private bool postPlayPanelHidden = false;
 	
-	private List<CanvasGroup> canvases = new List<CanvasGroup>();
+		private List<CanvasGroup> canvases = new List<CanvasGroup>();
 	
 
 	// Use this for initialization
@@ -279,7 +279,7 @@ public class MenuController : MonoBehaviour {
 		gameController.EditPlay (playNameText.text);
 		
 		// Display the play name
-		playNameText.text = gameController.playName;
+		//playNameText.text = gameController.playName;
 	}
 	
 	// Start a play
@@ -309,11 +309,12 @@ public class MenuController : MonoBehaviour {
 		
 		// Switch to the post-play buttons
 		HideInPlayButtons();
-		ShowPostPlayButtons ();
+		
 		
 		// Evaluate the play
 		correctnessText.text = "Your Score...";
 		int score = gameController.EndPlay ();
+		Invoke("ShowPostPlayButtons", gameController.animLength + 1f);
 		Debug.Log (score);
 		if (score < 1)
 			correctnessText.text = "Your Score: Incorrect";
@@ -358,10 +359,10 @@ public class MenuController : MonoBehaviour {
 		DisableInPlayCanvas();
 		postPlayPanelHidden = true;
 	}
-	private void DisableInPlayCanvas() {
+	public void DisableInPlayCanvas() {
 		inPlayCanvas.interactable = false;
 	}
-	private void EnableInPlayCanvas() {
+	public void EnableInPlayCanvas() {
 		inPlayCanvas.interactable = true;
 	}
 	
@@ -405,6 +406,5 @@ public class MenuController : MonoBehaviour {
 	
 	public void CancelEdit() {
 		gameController.EndEdit();
-		ShowMainMenu();
 	}
 }

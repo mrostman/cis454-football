@@ -8,6 +8,11 @@ public class GameController : MonoBehaviour {
 	public enum STATE {INACTIVE, LOADING, LOADED, SETUP, INPLAY, POSTPLAY, SAVING};
 	public STATE state = STATE.INACTIVE;
 	public bool editMode = false;
+	
+	public AudioSource iBuzzSound;
+	public AudioClip iBuzzClip;
+	public static AudioSource buzzSound;
+	public static AudioClip buzzClip;
 
 	// Player Tokens
 	public List<PlayerToken> offensiveTeam;
@@ -22,20 +27,26 @@ public class GameController : MonoBehaviour {
 	private ParseObject currentPlay;
 	private string currentPlayID;
 	private string editPlayName;
+	public float animLength;
 	
 	public System.DateTime playLastSeen;
 	public string playName;
 	private int timeLeft;
-	private const float distanceCorrectnessThreshold = 4;
+	private const float distanceCorrectnessThreshold = 6;
 
 	Queue playsToUpdate = new Queue ();
 	Queue userPlaysToUpload = new Queue ();
 	
 	public MenuController menuController;
 
+	public static void playBuzz() {
+		buzzSound.PlayOneShot(buzzClip);
+	}
+
 	// Use this for initialization
 	void Start () {
-		
+		buzzSound = iBuzzSound;
+		buzzClip = iBuzzClip;
 	}
 	
 	public void testFunc() { Debug.Log("Test"); }
@@ -143,17 +154,21 @@ public class GameController : MonoBehaviour {
 	
 	// Animate each player (With the correct data)
 	public float AnimateCorrectPlay() {
+		menuController.DisableInPlayCanvas();
 		float delay = 0f;
 		foreach (PlayerToken oPlayer in offensiveTeam)
-			delay = oPlayer.AnimateCorrectPlay();
+			delay = System.Math.Max(delay, oPlayer.AnimateCorrectPlay())	;
+		animLength = delay;
 		return delay;
 	}
 	
 	// Animate each player (With the data input by the user
 	public float AnimateInputPlay() {
+		menuController.DisableInPlayCanvas();
 		float delay = 0f;
 		foreach (PlayerToken oPlayer in offensiveTeam)
-			delay = oPlayer.AnimateInputPlay();
+			delay = System.Math.Max(delay, oPlayer.AnimateInputPlay());
+		animLength = delay;
 		return delay;
 	}
 

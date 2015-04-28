@@ -11,9 +11,9 @@ public class DatabaseController : MonoBehaviour {
 	public List<ParseObject> playQueryResults = new List<ParseObject> ();
 	List<ParseObject> historyQueryResults = new List<ParseObject> ();
 	List<ParseObject> srsQueryResults = new List<ParseObject> ();
-	List<ParseObject> oTeamQueryResults = new List<ParseObject> ();
-	List<ParseObject> dTeamQueryResults = new List<ParseObject> ();
-	List<ParseObject> playerQueryResults = new List<ParseObject> ();
+	//List<ParseObject> oTeamQueryResults = new List<ParseObject> ();
+	//List<ParseObject> dTeamQueryResults = new List<ParseObject> ();
+	//List<ParseObject> playerQueryResults = new List<ParseObject> ();
 	public static List<ParseObject> responsibilityQueryResults = new List<ParseObject> ();
 	public GameController gameController;
 
@@ -31,6 +31,7 @@ public class DatabaseController : MonoBehaviour {
 	{
 		ParseUser.LogInAsync("kris", "password").ContinueWith(t =>
 		{	
+			Debug.Log ("Logged in");
 			ParseQuery<ParseObject> playQuery = ParseObject.GetQuery("Play");
 			ParseQuery<ParseObject> historyQuery = ParseObject.GetQuery("History")
 				.WhereEqualTo("User",ParseUser.CurrentUser);
@@ -44,18 +45,18 @@ public class DatabaseController : MonoBehaviour {
 			Task playTask = playQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {playQueryResults.Add (i);}});
 			Task historyTask = historyQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {historyQueryResults.Add (i);}});
 			Task srsTask = srsQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {srsQueryResults.Add (i);}});
-			Task oTeamTask = oTeamQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {oTeamQueryResults.Add (i);}});
-			Task dTeamTask = dTeamQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {dTeamQueryResults.Add (i);}});
-			Task playerTask = playerQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) { playerQueryResults.Add (i);}});
+			//Task oTeamTask = oTeamQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {oTeamQueryResults.Add (i);}});
+			//Task dTeamTask = dTeamQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {dTeamQueryResults.Add (i);}});
+			//Task playerTask = playerQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) { playerQueryResults.Add (i);}});
 			Task responsibilityTask = responsibilityQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {responsibilityQueryResults.Add (i);}});
 
 			List<Task> tasks = new List<Task>();
 			tasks.Add (playTask);
 			tasks.Add (historyTask);
 			tasks.Add (srsTask);
-			tasks.Add (oTeamTask);
-			tasks.Add (dTeamTask);
-			tasks.Add (playerTask);
+			//tasks.Add (oTeamTask);
+			//tasks.Add (dTeamTask);
+			//tasks.Add (playerTask);
 			tasks.Add (responsibilityTask);
 
 			Task allQueriesTask = Task.WhenAll (tasks).ContinueWith(q => {
@@ -84,9 +85,11 @@ public class DatabaseController : MonoBehaviour {
 
 	void RebuildReferences ()
 	{
-		Debug.Log ("Player count: " + playerQueryResults.Count);
+		Debug.Log ("Rebuilding");
+		//Debug.Log ("Player count: " + playerQueryResults.Count);
 		foreach(ParseObject i in playQueryResults)
 		{
+			/*
 			//Debug.Log ("Play Name");
 			//Debug.Log (i.Get<string>("Name"));
 			ParseObject oTeamReference;
@@ -94,7 +97,7 @@ public class DatabaseController : MonoBehaviour {
 			if (result)
 			{
 				string oTeamID = oTeamReference.ObjectId;
-				ParseObject oTeam = oTeamQueryResults.Find (e => e.ObjectId == oTeamID);
+				//ParseObject oTeam = oTeamQueryResults.Find (e => e.ObjectId == oTeamID);
 				//Debug.Log(oTeam.ObjectId);
 				//Debug.Log (oTeam.Get<ParseObject>("Player0").ObjectId);
 				//i.SetProperty<ParseObject>(oTeam,"OffensiveTeam");
@@ -109,9 +112,9 @@ public class DatabaseController : MonoBehaviour {
 				string dTeamID =dTeamReference.ObjectId;
 				ParseObject dTeam = dTeamQueryResults.Find (e => e.ObjectId == dTeamID);
 				i["DefensiveTeam"] = dTeam;
-			}
+			}*/
 		}
-		foreach(ParseObject j in historyQueryResults)
+		/*foreach(ParseObject j in historyQueryResults)
 		{
 			ParseObject playReference;
 			bool result = j.TryGetValue("Play", out playReference);
@@ -134,8 +137,8 @@ public class DatabaseController : MonoBehaviour {
 				j["OffensiveTeam"] = oTeam;
 			}
 
-		}
-		foreach(ParseObject k in oTeamQueryResults)
+		}*/
+		/*foreach(ParseObject k in oTeamQueryResults)
 		{
 			ParseObject player0Reference;
 			bool result = k.TryGetValue("Player0", out player0Reference);
@@ -150,9 +153,9 @@ public class DatabaseController : MonoBehaviour {
 					Debug.Log(player0 == null);
 				}
 				k["Player0"] = player0;
-			}
+			}*/
 			
-			ParseObject player1Reference;
+			/*ParseObject player1Reference;
 			result = k.TryGetValue("Player1", out player1Reference);
 			if (result)
 			{
@@ -347,7 +350,7 @@ public class DatabaseController : MonoBehaviour {
 			//Debug.Log ("DTEAM");
 		}
 
-		foreach(ParseObject m in playerQueryResults)
+		/*foreach(ParseObject m in playerQueryResults)
 		{
 			ParseObject responsibilityReference;
 			bool result = m.TryGetValue("Responsib", out responsibilityReference);
@@ -359,7 +362,7 @@ public class DatabaseController : MonoBehaviour {
 
 				//Debug.Log (m.Get<ParseObject>("Responsib").ObjectId);
 			}
-		}
+		}*/
 
 		databaseLoaded = true;
 		//initializeTeamsTEST();
@@ -400,7 +403,7 @@ public class DatabaseController : MonoBehaviour {
 		Debug.Log (selectionValue);
 		float runningSrsSum = 0;
 		ParseObject selectedPlay = null;
-
+		Debug.Log ("Selecting");
 		foreach (ParseObject play in playQueryResults) 
 		{
 			float srsValue;

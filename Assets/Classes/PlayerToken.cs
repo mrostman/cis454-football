@@ -30,7 +30,7 @@ public class PlayerToken : MonoBehaviour {
 	private int menuPage = 0;			// Tracker for the current page (in the responsibility menu)
 	
 	// Grid variables
-	private const int maxX = 10;  		// Horizontal grid size
+	private const int maxX = 20;  		// Horizontal grid size
 	private const int maxY = -9;		// Vertacle grid size	
 	private Vector3 target;				// Snap to grid - point to snap to
 	private Vector3 startPoint; 		// Snap to grid - point the token is snapping from
@@ -205,6 +205,9 @@ public class PlayerToken : MonoBehaviour {
 	/// De-Initialize the PlayerToken, scrubbing it of any user input and readying it to be re-initialized with new data
 	/// </summary>
 	public void deInitialize() {
+		// Cancel any pending invokes and animations
+		CancelInvoke();
+		
 		// Clear editMode
 		editMode = false;
 	
@@ -213,6 +216,8 @@ public class PlayerToken : MonoBehaviour {
 		lines = new List<LineRenderer>();
 		foreach (GameObject lineHolder in lineHolders)
 			lines.Add( lineHolder.GetComponent<LineRenderer>() );
+		linesShow(true);
+
 			
 		// Clear the shifts/motions/responsibilities
 		clearInput ();
@@ -279,7 +284,9 @@ public class PlayerToken : MonoBehaviour {
 		// If the menu should be open, display it.
 		if (popMenu)
 		{
-			if (responsibilityMenu)
+			if (!controllable)
+				popMenu = false;
+			else if (responsibilityMenu)
 				showMenuResponsibility();
 			else
 				switch (state) {
@@ -1002,6 +1009,7 @@ public class PlayerToken : MonoBehaviour {
 	// Display the 'incorrect' skin (and play the incorrect noise) at the point in the play where the player's input
 	//   diverges from the 'correct' input
 	private void SetTokenIncorrect () {
+		GameController.playBuzz();
 		bigGuyModel.GetComponent<SkinnedMeshRenderer>().material = ghostMaterial;
 	}
 	
