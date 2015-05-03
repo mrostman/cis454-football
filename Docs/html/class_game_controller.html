@@ -48,6 +48,7 @@
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="class_game_controller-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">GameController Class Reference</div>  </div>
@@ -65,33 +66,52 @@ Public Types</h2></td></tr>
 <a class="el" href="class_game_controller.html#aef184f59042d0f6c41af585cc1786418addbb81a9e3aab6cfa19ad8eb2389efd4">STATE.SETUP</a>, 
 <br />
 &#160;&#160;<a class="el" href="class_game_controller.html#aef184f59042d0f6c41af585cc1786418a56bc897cac44cd1914cb246ba30c772d">STATE.INPLAY</a>, 
-<a class="el" href="class_game_controller.html#aef184f59042d0f6c41af585cc1786418af2554dbc956aa9a7e0503c98ab7da22b">STATE.POSTPLAY</a>
+<a class="el" href="class_game_controller.html#aef184f59042d0f6c41af585cc1786418af2554dbc956aa9a7e0503c98ab7da22b">STATE.POSTPLAY</a>, 
+<a class="el" href="class_game_controller.html#aef184f59042d0f6c41af585cc1786418a4ab2b7759f2b20744b1e239e93c72f1b">STATE.SAVING</a>
 <br />
  }</td></tr>
 <tr class="separator:aef184f59042d0f6c41af585cc1786418"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ac237e929d2a9008e2bfb177fe12f6b5d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#ac237e929d2a9008e2bfb177fe12f6b5d">testFunc</a> ()</td></tr>
-<tr class="separator:ac237e929d2a9008e2bfb177fe12f6b5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac79eba609f50a58d68a96ef7565d2bfc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#ac79eba609f50a58d68a96ef7565d2bfc">EditPlay</a> (string <a class="el" href="class_game_controller.html#a30ccfc6ca3d0229b58e9c2a6889100c2">playName</a>)</td></tr>
+<tr class="memdesc:ac79eba609f50a58d68a96ef7565d2bfc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called when a play is being edited.  <a href="#ac79eba609f50a58d68a96ef7565d2bfc">More...</a><br /></td></tr>
+<tr class="separator:ac79eba609f50a58d68a96ef7565d2bfc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1fa2ed0f9b9fde4345bc961a09dbb076"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#a1fa2ed0f9b9fde4345bc961a09dbb076">NewPlay</a> ()</td></tr>
+<tr class="memdesc:a1fa2ed0f9b9fde4345bc961a09dbb076"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called when a new round of play begins  <a href="#a1fa2ed0f9b9fde4345bc961a09dbb076">More...</a><br /></td></tr>
 <tr class="separator:a1fa2ed0f9b9fde4345bc961a09dbb076"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6cd4d76568a558fb789e98159742d4ea"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#a6cd4d76568a558fb789e98159742d4ea">PlayLoaded</a> (ParseObject loadedPlay)</td></tr>
+<tr class="memdesc:a6cd4d76568a558fb789e98159742d4ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback used by <a class="el" href="class_database_controller.html">DatabaseController</a> to return the requested play (after it has been loaded asyncronously  <a href="#a6cd4d76568a558fb789e98159742d4ea">More...</a><br /></td></tr>
 <tr class="separator:a6cd4d76568a558fb789e98159742d4ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa352d7ad53077970bc867f27ad0bb45b"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#aa352d7ad53077970bc867f27ad0bb45b">AnimateCorrectPlay</a> ()</td></tr>
+<tr class="memdesc:aa352d7ad53077970bc867f27ad0bb45b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Animate the correct play  <a href="#aa352d7ad53077970bc867f27ad0bb45b">More...</a><br /></td></tr>
 <tr class="separator:aa352d7ad53077970bc867f27ad0bb45b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab43c349a358ed870b9a7b63d1c735e69"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#ab43c349a358ed870b9a7b63d1c735e69">AnimateInputPlay</a> ()</td></tr>
+<tr class="memdesc:ab43c349a358ed870b9a7b63d1c735e69"><td class="mdescLeft">&#160;</td><td class="mdescRight">Animate the input play  <a href="#ab43c349a358ed870b9a7b63d1c735e69">More...</a><br /></td></tr>
 <tr class="separator:ab43c349a358ed870b9a7b63d1c735e69"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4507268e47e73ac003dd613fc08a8708"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#a4507268e47e73ac003dd613fc08a8708">TrySaveEdit</a> (string <a class="el" href="class_game_controller.html#a30ccfc6ca3d0229b58e9c2a6889100c2">playName</a>)</td></tr>
+<tr class="memdesc:a4507268e47e73ac003dd613fc08a8708"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attempt to save the newly created play.  <a href="#a4507268e47e73ac003dd613fc08a8708">More...</a><br /></td></tr>
+<tr class="separator:a4507268e47e73ac003dd613fc08a8708"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4bb17d0a5d71507c552d49bf03876405"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#a4bb17d0a5d71507c552d49bf03876405">ExistingFound</a> (int found)</td></tr>
+<tr class="memdesc:a4bb17d0a5d71507c552d49bf03876405"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback indicating if any plays with the selected play name already exist when saving  <a href="#a4bb17d0a5d71507c552d49bf03876405">More...</a><br /></td></tr>
+<tr class="separator:a4bb17d0a5d71507c552d49bf03876405"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f899fd692649748efe2a769d5af0cb3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#a1f899fd692649748efe2a769d5af0cb3">EndEdit</a> ()</td></tr>
+<tr class="memdesc:a1f899fd692649748efe2a769d5af0cb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ends edit mode, cleaning up variables, resetting the player tokens, and returning to the main menu.  <a href="#a1f899fd692649748efe2a769d5af0cb3">More...</a><br /></td></tr>
+<tr class="separator:a1f899fd692649748efe2a769d5af0cb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a11f207614f06b58d4d67500133f8db1e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#a11f207614f06b58d4d67500133f8db1e">EndPlay</a> ()</td></tr>
+<tr class="memdesc:a11f207614f06b58d4d67500133f8db1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called at the end of gameplay of each play to grade the play, animate the results, and save them  <a href="#a11f207614f06b58d4d67500133f8db1e">More...</a><br /></td></tr>
 <tr class="separator:a11f207614f06b58d4d67500133f8db1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abfc5649c7581d4d99cc44bcef4965122"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#abfc5649c7581d4d99cc44bcef4965122">StartEditPlay</a> ()</td></tr>
+<tr class="memdesc:abfc5649c7581d4d99cc44bcef4965122"><td class="mdescLeft">&#160;</td><td class="mdescRight">Starts the play editing mode  <a href="#abfc5649c7581d4d99cc44bcef4965122">More...</a><br /></td></tr>
 <tr class="separator:abfc5649c7581d4d99cc44bcef4965122"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a81481c17a58d0823e9aaf00ea677a6a7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#a81481c17a58d0823e9aaf00ea677a6a7">SaveThisPlay</a> (string <a class="el" href="class_game_controller.html#a30ccfc6ca3d0229b58e9c2a6889100c2">playName</a>)</td></tr>
-<tr class="separator:a81481c17a58d0823e9aaf00ea677a6a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a032515a6f625a2477ad00e69a0c2b9fa"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#a032515a6f625a2477ad00e69a0c2b9fa">playBuzz</a> ()</td></tr>
+<tr class="memdesc:a032515a6f625a2477ad00e69a0c2b9fa"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_play.html">Play</a> the 'buzz' sound for incorrect input  <a href="#a032515a6f625a2477ad00e69a0c2b9fa">More...</a><br /></td></tr>
+<tr class="separator:a032515a6f625a2477ad00e69a0c2b9fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac383064287ce227b745cb8de34da1698"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#ac383064287ce227b745cb8de34da1698">CheckTooFar</a> (Vector2 correct, Vector2 input)</td></tr>
+<tr class="memdesc:ac383064287ce227b745cb8de34da1698"><td class="mdescLeft">&#160;</td><td class="mdescRight">Correctness checker for positions - insures that an inputted position/shift/motion is within the acceptable margin of error from the correct position  <a href="#ac383064287ce227b745cb8de34da1698">More...</a><br /></td></tr>
 <tr class="separator:ac383064287ce227b745cb8de34da1698"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aebc234084b87481bceba5ea3f58517c3"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#aebc234084b87481bceba5ea3f58517c3">CheckTooFar</a> (Vector3 correct, Vector3 input)</td></tr>
 <tr class="separator:aebc234084b87481bceba5ea3f58517c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -100,16 +120,37 @@ Static Public Member Functions</h2></td></tr>
 Public Attributes</h2></td></tr>
 <tr class="memitem:ae0a1928e9b0e3393f9dd1e727c57590e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_game_controller.html#aef184f59042d0f6c41af585cc1786418">STATE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#ae0a1928e9b0e3393f9dd1e727c57590e">state</a> = STATE.INACTIVE</td></tr>
 <tr class="separator:ae0a1928e9b0e3393f9dd1e727c57590e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ae6c9ee84f6ed160faa7a734755ebcb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#a4ae6c9ee84f6ed160faa7a734755ebcb">editMode</a> = false</td></tr>
+<tr class="separator:a4ae6c9ee84f6ed160faa7a734755ebcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad2cb89d57e4492fb611cbf966bd50f6a"><td class="memItemLeft" align="right" valign="top">AudioSource&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#ad2cb89d57e4492fb611cbf966bd50f6a">iBuzzSound</a></td></tr>
+<tr class="separator:ad2cb89d57e4492fb611cbf966bd50f6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a646f9679fea4488d80322ce9487fef90"><td class="memItemLeft" align="right" valign="top">AudioClip&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#a646f9679fea4488d80322ce9487fef90">iBuzzClip</a></td></tr>
+<tr class="separator:a646f9679fea4488d80322ce9487fef90"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5d5ca159d623671259a6e94eb56b7b13"><td class="memItemLeft" align="right" valign="top">List&lt; <a class="el" href="class_player_token.html">PlayerToken</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#a5d5ca159d623671259a6e94eb56b7b13">offensiveTeam</a></td></tr>
 <tr class="separator:a5d5ca159d623671259a6e94eb56b7b13"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab232ab81a2fda6b8c2ff88617c2d8be1"><td class="memItemLeft" align="right" valign="top">List&lt; <a class="el" href="class_player_token.html">PlayerToken</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#ab232ab81a2fda6b8c2ff88617c2d8be1">defensiveTeam</a></td></tr>
 <tr class="separator:ab232ab81a2fda6b8c2ff88617c2d8be1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a66c0979508942073cf2a19a91b5f866b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_database_controller.html">DatabaseController</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#a66c0979508942073cf2a19a91b5f866b">databaseController</a></td></tr>
 <tr class="separator:a66c0979508942073cf2a19a91b5f866b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a171d76363271638fe0bc93586fa624e9"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#a171d76363271638fe0bc93586fa624e9">existingCount</a> = -1</td></tr>
+<tr class="separator:a171d76363271638fe0bc93586fa624e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb4025b0719c4aba387240ef09bfe68c"><td class="memItemLeft" align="right" valign="top">ParseObject&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#acb4025b0719c4aba387240ef09bfe68c">currentPlay</a></td></tr>
+<tr class="separator:acb4025b0719c4aba387240ef09bfe68c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6774f6d6a2d8524c9953779aa9ea9da"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#ab6774f6d6a2d8524c9953779aa9ea9da">animLength</a></td></tr>
+<tr class="separator:ab6774f6d6a2d8524c9953779aa9ea9da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a245c122809874c5e13ba769c0c329e73"><td class="memItemLeft" align="right" valign="top">System.DateTime&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#a245c122809874c5e13ba769c0c329e73">playLastSeen</a></td></tr>
 <tr class="separator:a245c122809874c5e13ba769c0c329e73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a30ccfc6ca3d0229b58e9c2a6889100c2"><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#a30ccfc6ca3d0229b58e9c2a6889100c2">playName</a></td></tr>
 <tr class="separator:a30ccfc6ca3d0229b58e9c2a6889100c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afceb937703bc9d581481808e9c3bd0d5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_menu_controller.html">MenuController</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#afceb937703bc9d581481808e9c3bd0d5">menuController</a></td></tr>
+<tr class="separator:afceb937703bc9d581481808e9c3bd0d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
+Static Public Attributes</h2></td></tr>
+<tr class="memitem:aca3251a1d97656ae6e27ca2fbb4f515b"><td class="memItemLeft" align="right" valign="top">static AudioSource&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#aca3251a1d97656ae6e27ca2fbb4f515b">buzzSound</a></td></tr>
+<tr class="separator:aca3251a1d97656ae6e27ca2fbb4f515b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f4c92e935a6cebfb7c00452ef9e6c55"><td class="memItemLeft" align="right" valign="top">static AudioClip&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_game_controller.html#a9f4c92e935a6cebfb7c00452ef9e6c55">buzzClip</a></td></tr>
+<tr class="separator:a9f4c92e935a6cebfb7c00452ef9e6c55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Enumeration Documentation</h2>
 <a class="anchor" id="aef184f59042d0f6c41af585cc1786418"></a>
@@ -134,6 +175,8 @@ Public Attributes</h2></td></tr>
 </td></tr>
 <tr><td class="fieldname"><a class="anchor" id="aef184f59042d0f6c41af585cc1786418af2554dbc956aa9a7e0503c98ab7da22b"></a>POSTPLAY&#160;</td><td class="fielddoc">
 </td></tr>
+<tr><td class="fieldname"><a class="anchor" id="aef184f59042d0f6c41af585cc1786418a4ab2b7759f2b20744b1e239e93c72f1b"></a>SAVING&#160;</td><td class="fielddoc">
+</td></tr>
 </table>
 
 </div>
@@ -152,6 +195,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Animate the correct play </p>
+<dl class="section return"><dt>Returns</dt><dd>The length of the animation being played (used by calling functions to proceed after the animation is finished but not before)</dd></dl>
+
 </div>
 </div>
 <a class="anchor" id="ab43c349a358ed870b9a7b63d1c735e69"></a>
@@ -166,6 +212,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Animate the input play </p>
+<dl class="section return"><dt>Returns</dt><dd>The length of the animation being played (used by calling functions to proceed after the animation is finished but not before)</dd></dl>
 
 </div>
 </div>
@@ -200,6 +249,16 @@ Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Correctness checker for positions - insures that an inputted position/shift/motion is within the acceptable margin of error from the correct position </p>
+<dl class="section return"><dt>Returns</dt><dd><code>true</code>, if the input is too far from the correct value, <code>false</code> otherwise.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">correct</td><td>The correct location</td></tr>
+    <tr><td class="paramname">input</td><td>The input location</td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -237,6 +296,47 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ac79eba609f50a58d68a96ef7565d2bfc"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void GameController.EditPlay </td>
+          <td>(</td>
+          <td class="paramtype">string&#160;</td>
+          <td class="paramname"><em>playName</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Called when a play is being edited. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">playName</td><td>The name of the play being edited</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a1f899fd692649748efe2a769d5af0cb3"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void GameController.EndEdit </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Ends edit mode, cleaning up variables, resetting the player tokens, and returning to the main menu. </p>
+
+</div>
+</div>
 <a class="anchor" id="a11f207614f06b58d4d67500133f8db1e"></a>
 <div class="memitem">
 <div class="memproto">
@@ -249,6 +349,33 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Called at the end of gameplay of each play to grade the play, animate the results, and save them </p>
+<dl class="section return"><dt>Returns</dt><dd>The player's score - currently only returns 1 (correct) or 0 (incorrect)</dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a4bb17d0a5d71507c552d49bf03876405"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void GameController.ExistingFound </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>found</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Callback indicating if any plays with the selected play name already exist when saving </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">found</td><td>The number of plays with the indicated name exist. Should always be 0 or 1</td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -264,6 +391,33 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Called when a new round of play begins </p>
+
+</div>
+</div>
+<a class="anchor" id="a032515a6f625a2477ad00e69a0c2b9fa"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void GameController.playBuzz </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="class_play.html">Play</a> the 'buzz' sound for incorrect input </p>
 
 </div>
 </div>
@@ -281,21 +435,13 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-</div>
-</div>
-<a class="anchor" id="a81481c17a58d0823e9aaf00ea677a6a7"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void GameController.SaveThisPlay </td>
-          <td>(</td>
-          <td class="paramtype">string&#160;</td>
-          <td class="paramname"><em>playName</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
+<p>Callback used by <a class="el" href="class_database_controller.html">DatabaseController</a> to return the requested play (after it has been loaded asyncronously </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">loadedPlay</td><td>The parse object containing the play that has been loaded</td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -312,24 +458,100 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Starts the play editing mode </p>
+
 </div>
 </div>
-<a class="anchor" id="ac237e929d2a9008e2bfb177fe12f6b5d"></a>
+<a class="anchor" id="a4507268e47e73ac003dd613fc08a8708"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void GameController.testFunc </td>
+          <td class="memname">void GameController.TrySaveEdit </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">string&#160;</td>
+          <td class="paramname"><em>playName</em></td><td>)</td>
           <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Attempt to save the newly created play. </p>
+<p>Begins the asyncronous process of checking to make sure a play with the selected name does not already exist. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">playName</td><td>The name of the new play to be saved</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a class="anchor" id="ab6774f6d6a2d8524c9953779aa9ea9da"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float GameController.animLength</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<h2 class="groupheader">Member Data Documentation</h2>
+<a class="anchor" id="a9f4c92e935a6cebfb7c00452ef9e6c55"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">AudioClip GameController.buzzClip</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aca3251a1d97656ae6e27ca2fbb4f515b"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">AudioSource GameController.buzzSound</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="acb4025b0719c4aba387240ef09bfe68c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ParseObject GameController.currentPlay</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a66c0979508942073cf2a19a91b5f866b"></a>
 <div class="memitem">
 <div class="memproto">
@@ -348,6 +570,66 @@ Public Attributes</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">List&lt;<a class="el" href="class_player_token.html">PlayerToken</a>&gt; GameController.defensiveTeam</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a4ae6c9ee84f6ed160faa7a734755ebcb"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool GameController.editMode = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a171d76363271638fe0bc93586fa624e9"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int GameController.existingCount = -1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a646f9679fea4488d80322ce9487fef90"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">AudioClip GameController.iBuzzClip</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ad2cb89d57e4492fb611cbf966bd50f6a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">AudioSource GameController.iBuzzSound</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="afceb937703bc9d581481808e9c3bd0d5"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_menu_controller.html">MenuController</a> GameController.menuController</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -408,7 +690,7 @@ Public Attributes</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Apr 16 2015 09:48:47 for Virtual Playbook by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun May 3 2015 15:34:23 for Virtual Playbook by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

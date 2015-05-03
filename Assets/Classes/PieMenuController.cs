@@ -23,7 +23,7 @@ public class PieMenuController : MonoBehaviour {
 	
 	
 
-	// Use this for initialization
+	// Initializes variaous values
 	void Start () {	
 		menuContentInitialized = iMenuContentInitialized;
 		menuContentShifted = iMenuContentShifted;
@@ -32,6 +32,7 @@ public class PieMenuController : MonoBehaviour {
 		menuController = iMenuController;
 	}
 	
+	// Partitions the full list of responsibilities into 'pages' for use with the pie menu
 	private List<List<GUIContent>> Partition() {
 		List<List<GUIContent>> outList = new List<List<GUIContent>>();
 		int size = DatabaseController.responsibilityQueryResults.Count;
