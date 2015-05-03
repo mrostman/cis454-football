@@ -11,380 +11,51 @@ public class DatabaseController : MonoBehaviour {
 	public List<ParseObject> playQueryResults = new List<ParseObject> ();
 	List<ParseObject> historyQueryResults = new List<ParseObject> ();
 	List<ParseObject> srsQueryResults = new List<ParseObject> ();
-	//List<ParseObject> oTeamQueryResults = new List<ParseObject> ();
-	//List<ParseObject> dTeamQueryResults = new List<ParseObject> ();
-	//List<ParseObject> playerQueryResults = new List<ParseObject> ();
 	public static List<ParseObject> responsibilityQueryResults = new List<ParseObject> ();
 	public GameController gameController;
 
 	// Use this for initialization
 	void Start () {
-		//GetPlays ();
 	}
 	
-	public bool Login () {
-		return false;
-	}
-
-
+	/// <summary>
+	/// Download the plays (And other necessary data) from the cloud database
+	/// </summary>
 	public void GetPlays () 
 	{
-		ParseUser.LogInAsync("kris", "password").ContinueWith(t =>
-		{	
-			Debug.Log ("Logged in");
-			ParseQuery<ParseObject> playQuery = ParseObject.GetQuery("Play");
-			ParseQuery<ParseObject> historyQuery = ParseObject.GetQuery("History")
-				.WhereEqualTo("User",ParseUser.CurrentUser);
-			ParseQuery<ParseObject> srsQuery = ParseObject.GetQuery("SRSData")
-				.WhereEqualTo("User",ParseUser.CurrentUser);
-			ParseQuery<ParseObject> oTeamQuery = ParseObject.GetQuery("OffensiveTeam");
-			ParseQuery<ParseObject> dTeamQuery = ParseObject.GetQuery("DefensiveTeam");
-			ParseQuery<ParseObject> playerQuery = ParseObject.GetQuery("Player");
-			ParseQuery<ParseObject> responsibilityQuery = ParseObject.GetQuery("Responsibility");
-
-			Task playTask = playQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {playQueryResults.Add (i);}});
-			Task historyTask = historyQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {historyQueryResults.Add (i);}});
-			Task srsTask = srsQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {srsQueryResults.Add (i);}});
-			//Task oTeamTask = oTeamQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {oTeamQueryResults.Add (i);}});
-			//Task dTeamTask = dTeamQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {dTeamQueryResults.Add (i);}});
-			//Task playerTask = playerQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) { playerQueryResults.Add (i);}});
-			Task responsibilityTask = responsibilityQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {responsibilityQueryResults.Add (i);}});
-
-			List<Task> tasks = new List<Task>();
-			tasks.Add (playTask);
-			tasks.Add (historyTask);
-			tasks.Add (srsTask);
-			//tasks.Add (oTeamTask);
-			//tasks.Add (dTeamTask);
-			//tasks.Add (playerTask);
-			tasks.Add (responsibilityTask);
-
-			Task allQueriesTask = Task.WhenAll (tasks).ContinueWith(q => {
-
-				// testing
-				//Debug.Log ("Play Task complete:");
-				//Debug.Log (playTask.IsCompleted);
-				//Debug.Log ("History Task complete:");
-				//Debug.Log (historyTask.IsCompleted);
-				//Debug.Log ("SRS Task complete:");
-				//Debug.Log (srsTask.IsCompleted);
-				//Debug.Log ("Offensive Team Task complete:");
-				//Debug.Log (oTeamTask.IsCompleted);
-				//Debug.Log ("Defensive Team Task complete:");
-				//Debug.Log (dTeamTask.IsCompleted);
-				//Debug.Log ("Player Task complete:");
-				//Debug.Log (playerTask.IsCompleted);
-				//Debug.Log ("Responsibility Task complete:");
-				//Debug.Log (responsibilityTask.IsCompleted);
-
-				//CalculateSRSTotal();
-				RebuildReferences();
-			});
-		});
-	}
-
-	void RebuildReferences ()
-	{
-		Debug.Log ("Rebuilding");
-		//Debug.Log ("Player count: " + playerQueryResults.Count);
-		foreach(ParseObject i in playQueryResults)
-		{
-			/*
-			//Debug.Log ("Play Name");
-			//Debug.Log (i.Get<string>("Name"));
-			ParseObject oTeamReference;
-			bool result = i.TryGetValue("OffensiveTeam", out oTeamReference);
-			if (result)
-			{
-				string oTeamID = oTeamReference.ObjectId;
-				//ParseObject oTeam = oTeamQueryResults.Find (e => e.ObjectId == oTeamID);
-				//Debug.Log(oTeam.ObjectId);
-				//Debug.Log (oTeam.Get<ParseObject>("Player0").ObjectId);
-				//i.SetProperty<ParseObject>(oTeam,"OffensiveTeam");
-				i["OffensiveTeam"] = oTeam;
-				//Debug.Log (i.Get<ParseObject>("OffensiveTeam").Get<ParseObject>("Player0"));
-			}
-
-			ParseObject dTeamReference;
-			result = i.TryGetValue("DefensiveTeam", out dTeamReference);
-			if (result)
-			{
-				string dTeamID =dTeamReference.ObjectId;
-				ParseObject dTeam = dTeamQueryResults.Find (e => e.ObjectId == dTeamID);
-				i["DefensiveTeam"] = dTeam;
-			}*/
-		}
-		/*foreach(ParseObject j in historyQueryResults)
-		{
-			ParseObject playReference;
-			bool result = j.TryGetValue("Play", out playReference);
-			if (result)
-			{
-				string playID = playReference.ObjectId;
-				ParseObject play = playQueryResults.Find (e => e.ObjectId == playID);
-				j["OffensiveTeam"] = play;
-			}
-
-			//Debug.Log (j.Get<ParseObject>("Play").ObjectId);
-			//Debug.Log (play.Get<ParseObject>("OffensiveTeam").ObjectId);
-
-			ParseObject oTeamReference;
-			result = j.TryGetValue("OffensiveTeam", out oTeamReference);
-			if (result)
-			{
-				string oTeamID = oTeamReference.ObjectId;
-				ParseObject oTeam = oTeamQueryResults.Find (e => e.ObjectId == oTeamID);
-				j["OffensiveTeam"] = oTeam;
-			}
-
-		}*/
-		/*foreach(ParseObject k in oTeamQueryResults)
-		{
-			ParseObject player0Reference;
-			bool result = k.TryGetValue("Player0", out player0Reference);
-			if (result)
-			{
-				string player0ID = player0Reference.ObjectId;
-
-				ParseObject player0 = playerQueryResults.Find (e => e.ObjectId == player0ID);
-				// TODO: Remove this (For debugging)
-				if (player0ID == "pF6PQpDjuB"){
-					Debug.Log ("FOUND PLAYER 0");
-					Debug.Log(player0 == null);
-				}
-				k["Player0"] = player0;
-			}*/
-			
-			/*ParseObject player1Reference;
-			result = k.TryGetValue("Player1", out player1Reference);
-			if (result)
-			{
-				string player1ID = player1Reference.ObjectId;
-				ParseObject player1 = playerQueryResults.Find (e => e.ObjectId == player1ID);
-				k["Player1"] = player1;
-			}
-			
-			ParseObject player2Reference;
-			result = k.TryGetValue("Player2", out player2Reference);
-			if (result)
-			{
-				string player2ID = player2Reference.ObjectId;
-				ParseObject player2 = playerQueryResults.Find (e => e.ObjectId == player2ID);
-				k["Player2"] = player2;
-			}
-			
-			ParseObject player3Reference;
-			result = k.TryGetValue("Player3", out player3Reference);
-			if (result)
-			{
-				string player3ID = player3Reference.ObjectId;
-				ParseObject player3 = playerQueryResults.Find (e => e.ObjectId == player3ID);
-				k["Player3"] = player3;
-			}
-			
-			ParseObject player4Reference;
-			result = k.TryGetValue("Player4", out player4Reference);
-			if (result)
-			{
-				string player4ID = player4Reference.ObjectId;
-				ParseObject player4 = playerQueryResults.Find (e => e.ObjectId == player4ID);
-				k["Player4"] = player4;
-			}
-			
-			ParseObject player5Reference;
-			result = k.TryGetValue("Player5", out player5Reference);
-			if (result)
-			{
-				string player5ID = player5Reference.ObjectId;
-				ParseObject player5 = playerQueryResults.Find (e => e.ObjectId == player5ID);
-				k["Player5"] = player5;
-			}
-			
-			ParseObject player6Reference;
-			result = k.TryGetValue("Player6", out player6Reference);
-			if (result)
-			{
-				string player6ID = player6Reference.ObjectId;
-				ParseObject player6 = playerQueryResults.Find (e => e.ObjectId == player6ID);
-				k["Player6"] = player6;
-			}
-			
-			ParseObject player7Reference;
-			result = k.TryGetValue("Player7", out player7Reference);
-			if (result)
-			{
-				string player7ID = player7Reference.ObjectId;
-				ParseObject player7 = playerQueryResults.Find (e => e.ObjectId == player7ID);
-				k["Player7"] = player7;
-			}
-			
-			ParseObject player8Reference;
-			result = k.TryGetValue("Player8", out player8Reference);
-			if (result)
-			{
-				string player8ID = player8Reference.ObjectId;
-				ParseObject player8 = playerQueryResults.Find (e => e.ObjectId == player8ID);
-				k["Player8"] = player8;
-			}	
-			
-			ParseObject player9Reference;
-			result = k.TryGetValue("Player9", out player9Reference);
-			if (result)
-			{
-				string player9ID = player9Reference.ObjectId;
-				ParseObject player9 = playerQueryResults.Find (e => e.ObjectId == player9ID);
-				k["Player9"] = player9;
-			}
-
-			ParseObject player10Reference;
-			result = k.TryGetValue("Player10", out player10Reference);
-			if (result)
-			{
-				string player10ID = player10Reference.ObjectId;
-				ParseObject player10 = playerQueryResults.Find (e => e.ObjectId == player10ID);
-				k["Player10"] = player10;
-			}
-		}
-
-		foreach(ParseObject l in dTeamQueryResults)
-		{
-			ParseObject player0Reference;
-			bool result = l.TryGetValue("Player0", out player0Reference);
-			if (result)
-			{
-				string player0ID = player0Reference.ObjectId;
-				ParseObject player0 = playerQueryResults.Find (e => e.ObjectId == player0ID);
-				l["Player0"] = player0;
-			}
-				
-			ParseObject player1Reference;
-			result = l.TryGetValue("Player1", out player1Reference);
-			if (result)
-			{
-				string player1ID = player1Reference.ObjectId;
-				ParseObject player1 = playerQueryResults.Find (e => e.ObjectId == player1ID);
-				l["Player1"] = player1;
-			}
-
-			ParseObject player2Reference;
-			result = l.TryGetValue("Player2", out player2Reference);
-			if (result)
-			{
-				string player2ID = player2Reference.ObjectId;
-				ParseObject player2 = playerQueryResults.Find (e => e.ObjectId == player2ID);
-				l["Player2"] = player2;
-			}
-
-			ParseObject player3Reference;
-			result = l.TryGetValue("Player3", out player3Reference);
-			if (result)
-			{
-				string player3ID = player3Reference.ObjectId;
-				ParseObject player3 = playerQueryResults.Find (e => e.ObjectId == player3ID);
-				l["Player3"] = player3;
-			}
-
-			ParseObject player4Reference;
-			result = l.TryGetValue("Player4", out player4Reference);
-			if (result)
-			{
-				string player4ID = player4Reference.ObjectId;
-				ParseObject player4 = playerQueryResults.Find (e => e.ObjectId == player4ID);
-				l["Player4"] = player4;
-			}
-
-			ParseObject player5Reference;
-			result = l.TryGetValue("Player5", out player5Reference);
-			if (result)
-			{
-				string player5ID = player5Reference.ObjectId;
-				ParseObject player5 = playerQueryResults.Find (e => e.ObjectId == player5ID);
-				l["Player5"] = player5;
-			}
-
-			ParseObject player6Reference;
-			result = l.TryGetValue("Player6", out player6Reference);
-			if (result)
-			{
-				string player6ID = player6Reference.ObjectId;
-				ParseObject player6 = playerQueryResults.Find (e => e.ObjectId == player6ID);
-				l["Player6"] = player6;
-			}
-
-			ParseObject player7Reference;
-			result = l.TryGetValue("Player7", out player7Reference);
-			if (result)
-			{
-				string player7ID = player7Reference.ObjectId;
-				ParseObject player7 = playerQueryResults.Find (e => e.ObjectId == player7ID);
-				l["Player7"] = player7;
-			}
-
-			ParseObject player8Reference;
-			result = l.TryGetValue("Player8", out player8Reference);
-			if (result)
-			{
-				string player8ID = player8Reference.ObjectId;
-				ParseObject player8 = playerQueryResults.Find (e => e.ObjectId == player8ID);
-				l["Player8"] = player8;
-			}	
-
-			ParseObject player9Reference;
-			result = l.TryGetValue("Player9", out player9Reference);
-			if (result)
-			{
-				string player9ID = player9Reference.ObjectId;
-				ParseObject player9 = playerQueryResults.Find (e => e.ObjectId == player9ID);
-				l["Player9"] = player9;
-			}
-
-			ParseObject player10Reference;
-			result = l.TryGetValue("Player10", out player10Reference);
-			if (result)
-			{
-				string player10ID = player10Reference.ObjectId;
-				ParseObject player10 = playerQueryResults.Find (e => e.ObjectId == player10ID);
-				l["Player10"] = player10;
-			}
+		// Set up the queries
+		ParseQuery<ParseObject> playQuery = ParseObject.GetQuery("Play");
+		ParseQuery<ParseObject> historyQuery = ParseObject.GetQuery("History")
+			.WhereEqualTo("User",ParseUser.CurrentUser);
+		ParseQuery<ParseObject> srsQuery = ParseObject.GetQuery("SRSData")
+			.WhereEqualTo("User",ParseUser.CurrentUser);
+		ParseQuery<ParseObject> responsibilityQuery = ParseObject.GetQuery("Responsibility");
 		
-			//Debug.Log ("DTEAM");
-		}
+		// Create a task for each query
+		Task playTask = playQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {playQueryResults.Add (i);}});
+		Task historyTask = historyQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {historyQueryResults.Add (i);}});
+		Task srsTask = srsQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {srsQueryResults.Add (i);}});
+		Task responsibilityTask = responsibilityQuery.FindAsync().ContinueWith(u => { foreach (ParseObject i in u.Result) {responsibilityQueryResults.Add (i);}});
+		
+		// Combine the tasks into an overtask
+		List<Task> tasks = new List<Task>();
+		tasks.Add (playTask);
+		tasks.Add (historyTask);
+		tasks.Add (srsTask);
+		tasks.Add (responsibilityTask);
 
-		/*foreach(ParseObject m in playerQueryResults)
-		{
-			ParseObject responsibilityReference;
-			bool result = m.TryGetValue("Responsib", out responsibilityReference);
-			if (result)
-			{
-				string responsibilityID = responsibilityReference.ObjectId;
-				ParseObject responsibility = responsibilityQueryResults.Find (e => e.ObjectId == responsibilityID);
-				m["Responsib"] = responsibility;
-
-				//Debug.Log (m.Get<ParseObject>("Responsib").ObjectId);
-			}
-		}*/
-
-		databaseLoaded = true;
-		//initializeTeamsTEST();
+		Task allQueriesTask = Task.WhenAll (tasks).ContinueWith(q => { databaseLoaded = true; });
 	}
-
-	// TODO: Remove this function! (For testing only
-	void initializeTeamsTEST(){
-		ParseObject play = playQueryResults[0];
-		ParseObject oTeam = play.Get<ParseObject>("OffensiveTeam");
-		ParseObject dTeam = play.Get<ParseObject>("DefensiveTeam");
-		for( int i = 0; i < 11; i++)
-		{
-			gameController.offensiveTeam[i].Initialize(oTeam.Get<ParseObject>("Player" + i));
-			gameController.defensiveTeam[i].Initialize(dTeam.Get<ParseObject>("Player" + i));
-		}
-	}
-
-	// TODO: implement once Play class structure is decided
+	
+	/// <summary>
+	/// Save the history of a completed round of play
+	/// </summary>
+	/// <returns><c>true</c>, if the play history was saved successfully, <c>false</c> otherwise.</returns>
+	/// <param name="playHistory">A parseobject containing the play history to be saved</param>
 	public bool UpdatePlay (ParseObject playHistory)
 	{
 		Task saveTask = playHistory.SaveAsync();
-
+		
 		if (saveTask.IsCompleted) 
 		{
 			return true;
@@ -394,7 +65,10 @@ public class DatabaseController : MonoBehaviour {
 			return false;
 		}
 	}
-
+	
+	/// <summary>
+	/// Select the play for the next round of play, as calculated by the SRS algorithm
+	/// </summary>
 	public void SelectPlay ()
 	{
 		Debug.Log (databaseLoaded);
@@ -424,7 +98,7 @@ public class DatabaseController : MonoBehaviour {
 					selectedPlay = play;
 					break;
 				}
-					
+				
 			}
 			else
 			{
@@ -435,6 +109,7 @@ public class DatabaseController : MonoBehaviour {
 		CheckIfRecentlySeen(selectedPlay);
 	}
 
+	// Calculate SRS variables
 	private float CalculateSRSTotal ()
 	{
 		float srsTotal = 0;
@@ -447,8 +122,6 @@ public class DatabaseController : MonoBehaviour {
 			{
 				ParseObject srsRow = srsQueryResults[0];
 				bool result = srsRow.TryGetValue(play.ObjectId.ToString (), out srsValue);
-				//Debug.Log ("play object ID: " + m.ObjectId);
-				//Debug.Log ("result: " + result);
 				if (!result)
 				{
 					srsValue = srsDefaultValue;
@@ -462,31 +135,18 @@ public class DatabaseController : MonoBehaviour {
 			}
 		}
 
-		//Debug.Log ("srs total: ");
-		//Debug.Log (srsTotal);
 		return srsTotal;
 	}
 
+	// Check if a play has been recently seen
 	private void CheckIfRecentlySeen(ParseObject play)
 	{
 		ParseQuery<ParseObject> playQuery = ParseObject.GetQuery ("Play")
 			.WhereEqualTo ("Name", play.Get<string>("Name"));
-//		Debug.Log ("selected play's name: " + play.Get<string> ("Name"));
 		playQuery.FindAsync ().ContinueWith (t => {foreach (ParseObject i in t.Result){Debug.Log ("play query matches: " + i.ObjectId);}});
 		ParseQuery<ParseObject> historyQuery = ParseObject.GetQuery ("History")
 			.WhereEqualTo("User", ParseUser.CurrentUser).WhereMatchesQuery("Play", playQuery)
 			.OrderByDescending("updatedAt");
-
-		// tried FirstOrDefaultAsync since it's supposed to solve our exact problem here, but documentation is
-		// nonexistent and has perplexing behavior leading to crashes.
-
-//		historyQuery.FirstOrDefaultAsync().ContinueWith(t => {
-//			Debug.Log ("in history continuation 1");
-//			Debug.Log ("what is t: " + t);
-//			Debug.Log ("is t null? false means null: " + (t!=null));
-//			// the following line crashes silently
-//			Debug.Log ("what is t.Result: " + t.Result);
-//			Debug.Log ("in history continuation 1.5");
 
 		List<ParseObject> historyQueryResult = new List<ParseObject> ();
 		historyQuery.FindAsync().ContinueWith(t => {
@@ -518,6 +178,10 @@ public class DatabaseController : MonoBehaviour {
 		});
 	}
 	
+	/// <summary>
+	/// Check if a play with a given name exists
+	/// </summary>
+	/// <param name="playName">The name of the play to be checked</param>
 	public void checkPlayExists(string playName) {
 		Debug.Log ("CheckPlayExistsCalled");
 		ParseQuery<ParseObject> playQuery = ParseObject.GetQuery ("Play")
@@ -526,6 +190,10 @@ public class DatabaseController : MonoBehaviour {
 		playQuery.CountAsync().ContinueWith(t => { gameController.ExistingFound(t.Result); } );
 	}
 	
+	/// <summary>
+	/// Load a play from the database by name
+	/// </summary>
+	/// <param name="playName">The name of the play to be loaded</param>
 	public void loadPlayByName(string playName) {
 		ParseQuery<ParseObject> playQuery = ParseObject.GetQuery ("Play")
 			.WhereEqualTo("Name", playName)
@@ -580,6 +248,10 @@ public class DatabaseController : MonoBehaviour {
 		playQuery.FirstAsync().ContinueWith(loadedPlay => { gameController.PlayLoaded(loadedPlay.Result); } );
 	}
 	
+	/// <summary>
+	/// Load a play from the database by objectID
+	/// </summary>
+	/// <param name="playID">The objectID of the play to be loaded</param>
 	public void loadPlay(string playID) {
 		ParseQuery<ParseObject> playQuery = ParseObject.GetQuery ("Play")
 			.Include("OffensiveTeam")

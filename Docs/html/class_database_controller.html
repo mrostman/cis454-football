@@ -57,19 +57,29 @@
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a629982936d9e66b6f791470b25c97fe0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_database_controller.html#a629982936d9e66b6f791470b25c97fe0">Login</a> ()</td></tr>
-<tr class="separator:a629982936d9e66b6f791470b25c97fe0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a987fb5e017a96a3ae1c26fda2bd3bcba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_database_controller.html#a987fb5e017a96a3ae1c26fda2bd3bcba">GetPlays</a> ()</td></tr>
+<tr class="memdesc:a987fb5e017a96a3ae1c26fda2bd3bcba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Download the plays (And other necessary data) from the cloud database  <a href="#a987fb5e017a96a3ae1c26fda2bd3bcba">More...</a><br /></td></tr>
 <tr class="separator:a987fb5e017a96a3ae1c26fda2bd3bcba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a49f3ca62f437a1b179f4c8886a7335ed"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_database_controller.html#a49f3ca62f437a1b179f4c8886a7335ed">UpdatePlay</a> (ParseObject playHistory)</td></tr>
+<tr class="memdesc:a49f3ca62f437a1b179f4c8886a7335ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Save the history of a completed round of play  <a href="#a49f3ca62f437a1b179f4c8886a7335ed">More...</a><br /></td></tr>
 <tr class="separator:a49f3ca62f437a1b179f4c8886a7335ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa556865869575affefea6e04f18b956a"><td class="memItemLeft" align="right" valign="top">ParseObject&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_database_controller.html#aa556865869575affefea6e04f18b956a">SelectPlay</a> ()</td></tr>
-<tr class="separator:aa556865869575affefea6e04f18b956a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8ff5370d11eef9ffb5104e12ab611f2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_database_controller.html#aa8ff5370d11eef9ffb5104e12ab611f2">SelectPlay</a> ()</td></tr>
+<tr class="memdesc:aa8ff5370d11eef9ffb5104e12ab611f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Select the play for the next round of play, as calculated by the SRS algorithm  <a href="#aa8ff5370d11eef9ffb5104e12ab611f2">More...</a><br /></td></tr>
+<tr class="separator:aa8ff5370d11eef9ffb5104e12ab611f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa06fd3b5a464c0424c2b38334ebcbbb7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_database_controller.html#aa06fd3b5a464c0424c2b38334ebcbbb7">checkPlayExists</a> (string playName)</td></tr>
+<tr class="memdesc:aa06fd3b5a464c0424c2b38334ebcbbb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a play with a given name exists  <a href="#aa06fd3b5a464c0424c2b38334ebcbbb7">More...</a><br /></td></tr>
+<tr class="separator:aa06fd3b5a464c0424c2b38334ebcbbb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41cd7838371483a7985e85dc9b6333c1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_database_controller.html#a41cd7838371483a7985e85dc9b6333c1">loadPlayByName</a> (string playName)</td></tr>
+<tr class="memdesc:a41cd7838371483a7985e85dc9b6333c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load a play from the database by name  <a href="#a41cd7838371483a7985e85dc9b6333c1">More...</a><br /></td></tr>
+<tr class="separator:a41cd7838371483a7985e85dc9b6333c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a982c1506788a54383a3c036e46158f2b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_database_controller.html#a982c1506788a54383a3c036e46158f2b">loadPlay</a> (string playID)</td></tr>
+<tr class="memdesc:a982c1506788a54383a3c036e46158f2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load a play from the database by objectID  <a href="#a982c1506788a54383a3c036e46158f2b">More...</a><br /></td></tr>
 <tr class="separator:a982c1506788a54383a3c036e46158f2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
+<tr class="memitem:a8df21a1e11a542fa2d44e35a72155cd9"><td class="memItemLeft" align="right" valign="top">List&lt; ParseObject &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_database_controller.html#a8df21a1e11a542fa2d44e35a72155cd9">playQueryResults</a> = new List&lt;ParseObject&gt; ()</td></tr>
+<tr class="separator:a8df21a1e11a542fa2d44e35a72155cd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a818f5e21877ae806f7e2a16e1f745c24"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_game_controller.html">GameController</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_database_controller.html#a818f5e21877ae806f7e2a16e1f745c24">gameController</a></td></tr>
 <tr class="separator:a818f5e21877ae806f7e2a16e1f745c24"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -81,6 +91,30 @@ Static Public Attributes</h2></td></tr>
 <tr class="separator:a3964316b5470bf61b6412286b4aee2e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="aa06fd3b5a464c0424c2b38334ebcbbb7"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DatabaseController.checkPlayExists </td>
+          <td>(</td>
+          <td class="paramtype">string&#160;</td>
+          <td class="paramname"><em>playName</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Check if a play with a given name exists </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">playName</td><td>The name of the play to be checked</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a987fb5e017a96a3ae1c26fda2bd3bcba"></a>
 <div class="memitem">
 <div class="memproto">
@@ -93,6 +127,8 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Download the plays (And other necessary data) from the cloud database </p>
 
 </div>
 </div>
@@ -110,14 +146,46 @@ Static Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Load a play from the database by objectID </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">playID</td><td>The objectID of the play to be loaded</td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
-<a class="anchor" id="a629982936d9e66b6f791470b25c97fe0"></a>
+<a class="anchor" id="a41cd7838371483a7985e85dc9b6333c1"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool DatabaseController.Login </td>
+          <td class="memname">void DatabaseController.loadPlayByName </td>
+          <td>(</td>
+          <td class="paramtype">string&#160;</td>
+          <td class="paramname"><em>playName</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Load a play from the database by name </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">playName</td><td>The name of the play to be loaded</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="aa8ff5370d11eef9ffb5104e12ab611f2"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DatabaseController.SelectPlay </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -125,20 +193,7 @@ Static Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-</div>
-</div>
-<a class="anchor" id="aa556865869575affefea6e04f18b956a"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">ParseObject DatabaseController.SelectPlay </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
+<p>Select the play for the next round of play, as calculated by the SRS algorithm </p>
 
 </div>
 </div>
@@ -155,6 +210,15 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Save the history of a completed round of play </p>
+<dl class="section return"><dt>Returns</dt><dd><code>true</code>, if the play history was saved successfully, <code>false</code> otherwise.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">playHistory</td><td>A parseobject containing the play history to be saved</td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -191,6 +255,18 @@ Static Public Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a8df21a1e11a542fa2d44e35a72155cd9"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">List&lt;ParseObject&gt; DatabaseController.playQueryResults = new List&lt;ParseObject&gt; ()</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a3964316b5470bf61b6412286b4aee2e8"></a>
 <div class="memitem">
 <div class="memproto">
@@ -217,7 +293,7 @@ Static Public Attributes</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Apr 16 2015 09:48:47 for Virtual Playbook by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun May 3 2015 15:34:23 for Virtual Playbook by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

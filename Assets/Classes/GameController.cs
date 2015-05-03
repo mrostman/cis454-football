@@ -9,6 +9,7 @@ public class GameController : MonoBehaviour {
 	public STATE state = STATE.INACTIVE;
 	public bool editMode = false;
 	
+	// Sound handler for 'wrong answer' sound
 	public AudioSource iBuzzSound;
 	public AudioClip iBuzzClip;
 	public static AudioSource buzzSound;
@@ -19,46 +20,55 @@ public class GameController : MonoBehaviour {
 	public List<PlayerToken> defensiveTeam;
 	public DatabaseController databaseController;
 	
-	// For edit mode
+	// Edit mode variables
 	public int existingCount = -1;
 	private string playNameToSave;
+	private string editPlayName;
 
 	// Variables for keeping track of the current play
 	public ParseObject currentPlay;
 	private string currentPlayID;
-	private string editPlayName;
 	public float animLength;
 	
+	// Correctness tracking variables
 	public System.DateTime playLastSeen;
 	public string playName;
 	private int timeLeft;
 	private const float distanceCorrectnessThreshold = 6;
 
+	// Queues for information to be saved back to the cloud database
 	Queue playsToUpdate = new Queue ();
 	Queue userPlaysToUpload = new Queue ();
 	
+	// Menu controller
 	public MenuController menuController;
 
+	/// <summary>
+	/// Play the 'buzz' sound for incorrect input
+	/// </summary>
 	public static void playBuzz() {
 		buzzSound.PlayOneShot(buzzClip);
 	}
 
-	// Use this for initialization
+	// Initialize variables
 	void Start () {
 		buzzSound = iBuzzSound;
 		buzzClip = iBuzzClip;
 	}
 	
-	public void testFunc() { Debug.Log("Test"); }
-	
-	// Special NewPlay method for editplay
+	/// <summary>
+	/// Called when a play is being edited. 
+	/// </summary>
+	/// <param name="playName">The name of the play being edited</param>
 	public void EditPlay (string playName) {
 		editMode = true;
 		editPlayName = playName;
 		NewPlay ();
 	}
 
-	// called when a new round of gameplay begins
+	/// <summary>
+	/// Called when a new round of play begins
+	/// </summary>
 	public void NewPlay () {
 		// Reset the displayed play name
 		playName = "";
@@ -72,7 +82,6 @@ public class GameController : MonoBehaviour {
 		PlayerToken.newPlay ();
 		PlayerToken.editMode = editMode;
 		
-		// TODO: Statement to make DBController load the play here
 
 		// Select the next play to be displayed, and load it from the database. Or, if in edit mode, load the play to edit
 		if (editMode) {
@@ -83,7 +92,6 @@ public class GameController : MonoBehaviour {
 		}
 		else {
 			databaseController.SelectPlay ();
-//			databaseController.loadPlay(currentPlay.ObjectId);
 		}
 		state = STATE.LOADING;
 	}
@@ -146,13 +154,20 @@ public class GameController : MonoBehaviour {
 	}
 	
 	// Used by DatabaseController to return the requested play
+	/// <summary>
+	/// Callback used by DatabaseController to return the requested play (after it has been loaded asyncronously
+	/// </summary>
+	/// <param name="loadedPlay">The parse object containing the play that has been loaded</param>
 	public void PlayLoaded(ParseObject loadedPlay) {
 		currentPlay = loadedPlay;
 		Debug.Log ("Play loaded: " + currentPlay.Get<string>("Name"));
 		state = STATE.LOADED;
 	}
 	
-	// Animate each player (With the correct data)
+	/// <summary>
+	/// Animate the correct play
+	/// </summary>
+	/// <returns>The length of the animation being played (used by calling functions to proceed after the animation is finished but not before)</returns>
 	public float AnimateCorrectPlay() {
 		menuController.DisableInPlayCanvas();
 		float delay = 0f;
@@ -162,7 +177,10 @@ public class GameController : MonoBehaviour {
 		return delay;
 	}
 	
-	// Animate each player (With the data input by the user
+	/// <summary>
+	/// Animate the input play
+	/// </summary>
+	/// <returns>The length of the animation being played (used by calling functions to proceed after the animation is finished but not before)</returns>
 	public float AnimateInputPlay() {
 		menuController.DisableInPlayCanvas();
 		float delay = 0f;
@@ -172,7 +190,10 @@ public class GameController : MonoBehaviour {
 		return delay;
 	}
 
-	
+	/// <summary>
+	/// Attempt to save the newly created play. Begins the asyncronous process of checking to make sure a play with the selected name does not already exist.
+	/// </summary>
+	/// <param name="playName">The name of the new play to be saved</param>
 	public void TrySaveEdit(string playName) {
 		Debug.Log ("TrySaveEditCalled");
 		playNameToSave = playName;
@@ -180,12 +201,14 @@ public class GameController : MonoBehaviour {
 		state = STATE.SAVING;
 	}
 	
+	// Called by to abandon the saving of a play when the play name is already used. Pops an error message and returns to the play editing state.
 	private void SaveEditFail() {
 		menuController.SaveError ("Unable to save play: Play with name \"" + playNameToSave + "\" already exists. " +
 								  "Choose a new name and try again.");
 		state = STATE.INPLAY;
 	}
 	
+	// Callback to finish the saving of a play when the play name used is not already in use.
 	private void SaveEdit() {
 		state = STATE.INPLAY;
 		Debug.Log ("SaveEditCalled");
@@ -205,23 +228,25 @@ public class GameController : MonoBehaviour {
 		}
 		
 		newPlay["Name"] = playNameToSave;
-		//newPlay["Parent"] = ParseObject.CreateWithoutData("Play", currentPlayID);
 		newPlay["OffensiveTeam"] = oTeam;
 		newPlay["DefensiveTeam"] = dTeam;
 		
 		newPlay.SaveAsync().ContinueWith( t => { Debug.Log("SAVED: " + t.Exception); }); ;
 		
-		// TODO: Switch over to que-based updating
-		//playsToUpdate.Enqueue (newPlay);
 		EndEdit();
 	}
-	
+	/// <summary>
+	/// Callback indicating if any plays with the selected play name already exist when saving
+	/// </summary>
+	/// <param name="found">The number of plays with the indicated name exist. Should always be 0 or 1</param>
 	public void ExistingFound(int found) {
 		Debug.Log ("ExistingFoundCalled" + found + state);
 		existingCount = found;
 	}
 	
-	// End edit mode, cleaning up and scrubbing the player tokens
+	/// <summary>
+	/// Ends edit mode, cleaning up variables, resetting the player tokens, and returning to the main menu.
+	/// </summary>
 	public void EndEdit() {
 		foreach(PlayerToken token in offensiveTeam)
 			token.deInitialize();
@@ -234,7 +259,10 @@ public class GameController : MonoBehaviour {
 		menuController.ShowMainMenu();
 	}
 
-	// Called at the end of gameplay of each play to grade the play, animate the results, and save them
+	/// <summary>
+	/// Called at the end of gameplay of each play to grade the play, animate the results, and save them
+	/// </summary>
+	/// <returns>The player's score - currently only returns 1 (correct) or 0 (incorrect)</returns>
 	public int EndPlay () {
 		Debug.Log (playName);
 		
@@ -396,6 +424,12 @@ public class GameController : MonoBehaviour {
 		return 1;
 	}
 
+	/// <summary>
+	/// Correctness checker for positions - insures that an inputted position/shift/motion is within the acceptable margin of error from the correct position
+	/// </summary>
+	/// <returns><c>true</c>, if the input is too far from the correct value, <c>false</c> otherwise.</returns>
+	/// <param name="correct">The correct location</param>
+	/// <param name="input">The input location</param>
 	public static bool CheckTooFar(Vector2 correct, Vector2 input)
 	{
 		if (correct == Vector2.zero && input !=Vector2.zero) 
@@ -498,8 +532,9 @@ public class GameController : MonoBehaviour {
 		}
 	}
 	
-	
-	// TODO: Temporary play editor functions
+	/// <summary>
+	/// Starts the play editing mode
+	/// </summary>
 	public void StartEditPlay() {
 		editMode = true;
 	}

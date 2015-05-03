@@ -66,10 +66,10 @@ public class MenuController : MonoBehaviour {
 	private Vector3 postPlayPanelHide = new Vector3(0f, 70f, 0f);
 	private bool postPlayPanelHidden = false;
 	
-		private List<CanvasGroup> canvases = new List<CanvasGroup>();
+	private List<CanvasGroup> canvases = new List<CanvasGroup>();
 	
 
-	// Use this for initialization
+	// Initialize various values
 	void Start () {
 		HideInPlayButtons();
 		HidePostPlayButtons();
@@ -118,25 +118,35 @@ public class MenuController : MonoBehaviour {
 		}
 	}
 	
-	// Show a given canvas (menu)
+	/// <summary>
+	/// Shows a selected canvas (Making it visible and interactable)
+	/// </summary>
+	/// <param name="canvas">The canvas to be shown</param>
 	public void ShowCanvas(CanvasGroup canvas){
 		canvas.alpha = 1f;
 		canvas.interactable = true;
 		canvas.blocksRaycasts = true;
 	}
 	
-	// Hide a given canvas (menu)s
+	/// <summary>
+	/// Hides a selected canvas (making it invisible and uninteractable)
+	/// </summary>
+	/// <param name="canvas">The canvas to be hidden</param>
 	public void HideCanvas(CanvasGroup canvas) {
 		canvas.alpha = 0f;
 		canvas.interactable = false;
 		canvas.blocksRaycasts = false;
 	}
 	
+	/// <summary>
+	/// Hides ALL canvases (Calling HideCavnas on each)
+	/// </summary>
 	public void HideAll(){
 		foreach (CanvasGroup c in canvases)
 			HideCanvas (c);
 	}
 	
+	// Generate and arrange buttons corrsponding to the list of existing plays
 	private void GeneratePlayListButtons() {
 		// Setup first button
 		pButton.GetComponentInChildren<Text>().text = databaseController.playQueryResults[0].Get<string>("Name");
@@ -190,7 +200,9 @@ public class MenuController : MonoBehaviour {
 			Debug.LogError("Unknown login status: " + login.Result);
 	}
 	
-	//Display the main menu, called from logging in or from quitting from other modes.
+	/// <summary>
+	/// Display the main menu
+	/// </summary>
 	public void ShowMainMenu () {
 		HideAll();
 		if (isStaff) {
@@ -237,7 +249,9 @@ public class MenuController : MonoBehaviour {
 			StartPlay ();
 	}
 
-	// Attempt to log into parse, called by the login button in the login Canvas
+	/// <summary>
+	/// Attempt to log into parse with the entered username and password
+	/// </summary>
 	public void TryLogin() {
 		// Disable the input fields while we wait for the result of the login
 		loginButton.interactable = false;
@@ -247,7 +261,9 @@ public class MenuController : MonoBehaviour {
 		ParseUser.LogInAsync(username.text, password.text).ContinueWith(t => {  login = t; });
 	}
 	
-	// Attempt to start a play
+	/// <summary>
+	/// Attempt to start a round of play
+	/// </summary>
 	public void TryStartPlay() {
 		// Hide the main menu
 		HideCanvas(mainMenuCanvasPlayer);
@@ -266,6 +282,10 @@ public class MenuController : MonoBehaviour {
 		}
 	}
 	
+	/// <summary>
+	/// Start edit mode (the process of creating a new play)
+	/// </summary>
+	/// <param name="playNameText">The name of the existing play to use as a basis for the new play being created</param>
 	public void StartEdit(Text playNameText) {
 		// Change the state
 		state = STATE.EDIT;
@@ -282,7 +302,7 @@ public class MenuController : MonoBehaviour {
 		//playNameText.text = gameController.playName;
 	}
 	
-	// Start a play
+	// Start a round of play
 	private void StartPlay() {
 		// Change the state
 		state = STATE.INPLAY;
@@ -303,6 +323,9 @@ public class MenuController : MonoBehaviour {
 		playNameText.text = gameController.playName;
 	}
 	
+	/// <summary>
+	/// End a round of play
+	/// </summary>
 	public void FinishPlay() {
 		Debug.Log ("FinishPlay");
 		state = STATE.POSTPLAY;
@@ -322,55 +345,79 @@ public class MenuController : MonoBehaviour {
 			correctnessText.text = "Your Score: Correct!";
 	}
 	
+	/// <summary>
+	/// Show the select play panel
+	/// </summary>
 	public void ShowSelectPlayPanel() {
 		HideCanvas (mainMenuCanvasStaff);
 		ShowCanvas (selectExistingPlayCanvas);
 	}
 	
+	/// <summary>
+	/// Animate the correct input for the play
+	/// </summary>
 	public void AnimateCorrectPlay() {
 		DisableInPlayCanvas();
 		float delay = gameController.AnimateCorrectPlay();
 		Invoke ("EnableInPlayCanvas",delay+1f);
 	}
 	
+	/// <summary>
+	/// Animate the user input for the play
+	/// </summary>
 	public void AnimateInputPlay() {
 		DisableInPlayCanvas();
 		float delay = gameController.AnimateInputPlay();
 		Invoke ("EnableInPlayCanvas",delay+1f);
 	}
 	
+	// Show the in play buttons
 	private void ShowInPlayButtons() {
 		inPlayPanel.ScaleTo (inPlayPanelShow, 1.5f, 0f);
 		Invoke ("EnableInPlayCanvas", 1f);
 	}
+	
+	// Hide the in play buttons
 	private void HideInPlayButtons() {
 		inPlayPanel.ScaleTo (inPlayPanelHide, 1.5f, 0f);
 		DisableInPlayCanvas();
 	}
+	
+	// Show the post-play buttons
 	private void ShowPostPlayButtons() {
 		if (postPlayPanelHidden)
 			postPlayPanel.MoveBy (postPlayPanelShow, 1.5f, 0f);
 		Invoke ("EnableInPlayCanvas", 1f);
 		postPlayPanelHidden = false;
 	}
+	
+	// Hide the post-play buttons
 	private void HidePostPlayButtons() {
 		if (!postPlayPanelHidden)
 			postPlayPanel.MoveBy (postPlayPanelHide, 1.5f, 0f);
 		DisableInPlayCanvas();
 		postPlayPanelHidden = true;
 	}
+	
+	// Disable input to the in-play menu
 	public void DisableInPlayCanvas() {
 		inPlayCanvas.interactable = false;
 	}
+	
+	// Enable input to the in-play menu
 	public void EnableInPlayCanvas() {
 		inPlayCanvas.interactable = true;
 	}
 	
-	// Play Editor Functions
-	public void SelectParentPlay(GameObject playNameButton) {
+	/*public void SelectParentPlay(GameObject playNameButton) {
 		//playNameButton = 
 	}
-	public void StartPlayMode() {}
+	public void StartPlayMode() {}*/
+	
+	/// <summary>
+	/// Show the properties popup menu for a given player token
+	/// </summary>
+	/// <param name="token">The selected player token</param>
 	public void ShowPlayerProperties(PlayerToken token) {
 		tokenBeingEdited = token;
 		playerPositionText.text = token.position;
@@ -378,32 +425,55 @@ public class MenuController : MonoBehaviour {
 		playerControllableToggle.isOn = token.saveControllable;
 		ShowCanvas (playerPropertiesCanvas);
 	}
+	
+	/// <summary>
+	/// Saves the position (text) of the player token being edited
+	/// </summary>
 	public void SavePlayerPosition() {
 		tokenBeingEdited.position = playerPositionText.text;
 	}
 	
+	/// <summary>
+	/// Saves the abbreviation of the player token being edited
+	/// </summary>
 	public void SavePlayerAbbreviation() {
 		tokenBeingEdited.abbreviation = playerAbbreviationText.text;
 	}
 	
+	/// <summary>
+	/// Saves the controllable flag of the player token being edited
+	/// </summary>
 	public void SavePlayerControllable() {
 		tokenBeingEdited.saveControllable = playerControllableToggle.isOn;
 		
 	}
 
+	/// <summary>
+	/// Close the player properties pop-up menu
+	/// </summary>
 	public void ClosePlayerProperties() {
 		PlayerToken.propertiesMenu = false;
 	}
 	
+	/// <summary>
+	/// Show an error message.
+	/// </summary>
+	/// <param name="errorText">The text to be displayed as the error</param>
 	public void SaveError(string errorText) {
 		editorErrorText.text = errorText;
 		ShowCanvas (editorErrorCanvas);
 	}
 	
+	/// <summary>
+	/// Attempt to save the new play
+	/// </summary>
 	public void TrySaveEdit() {
 		gameController.TrySaveEdit(playNameField.text);
 	}
 	
+	/// <summary>
+	/// Abandon the newly created play
+	/// </summary>
 	public void CancelEdit() {
 		gameController.EndEdit();
 	}
