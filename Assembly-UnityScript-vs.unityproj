@@ -79,13 +79,13 @@
      <None Include="Assets\Pie Menu\Skins\MetroPie\Icons\Metro Icon Set.txt" />
      <None Include="Assets\Pie Menu\PieMenu (Legacy v1.0).txt" />
  <Reference Include="Assembly-UnityScript-firstpass">
- <HintPath>C:/Users/Matt/Documents/GitHub/cis454-football/Library/ScriptAssemblies/Assembly-UnityScript-firstpass.dll</HintPath>
+ <HintPath>C:/Users/Jason/Documents/GitHub/cis454-football/Library/ScriptAssemblies/Assembly-UnityScript-firstpass.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files (x86)/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/4.6.3/UnityEngine.UI.dll</HintPath>
  </Reference>
  <Reference Include="Parse.Unity">
- <HintPath>C:/Users/Matt/Documents/GitHub/cis454-football/Assets/Parse.Unity.dll</HintPath>
+ <HintPath>C:/Users/Jason/Documents/GitHub/cis454-football/Assets/Parse.Unity.dll</HintPath>
  </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -24,7 +24,7 @@ public class GameController : MonoBehaviour {
 	private string playNameToSave;
 
 	// Variables for keeping track of the current play
-	private ParseObject currentPlay;
+	public ParseObject currentPlay;
 	private string currentPlayID;
 	private string editPlayName;
 	public float animLength;
@@ -82,8 +82,8 @@ public class GameController : MonoBehaviour {
 				databaseController.loadPlayByName (editPlayName);
 		}
 		else {
-			currentPlay = databaseController.SelectPlay ();
-			databaseController.loadPlay(currentPlay.ObjectId);
+			databaseController.SelectPlay ();
+//			databaseController.loadPlay(currentPlay.ObjectId);
 		}
 		state = STATE.LOADING;
 	}
