@@ -423,12 +423,36 @@ public class GameController : MonoBehaviour {
 		return false;
 	}
 
+	// SRS coefficient is typically the product of age component, progress component, effort component
 	float SRSRecalculate (int correctness, System.DateTime sinceLastPlayed) {
-		// TODO: SRS coefficient product of age component, progress component, effort component
-		// Age A(x) = Cn^x			(x is time elapsed, C is initial constant)
-		// Progress P(x) = Cn^-x	(x is previous success)
-		// Effort {1,10}
-		return  0;
+		float ageFactor;
+		float effortFactor;
+		float totalCoefficient;
+		
+		// Age component A(x) = Cn^x	(x is time elapsed, C is initial constant)
+		// n used for age component = e^(ln(2)/5)
+		System.DateTime now = System.DateTime.Now;
+		System.TimeSpan elapsed = now.Subtract(sinceLastPlayed);
+		float daysAgo = (float)elapsed.TotalDays;
+		float ageBase = (float)System.Math.Exp (System.Math.Log (2) / 5);
+		ageFactor = (float)System.Math.Pow (ageBase, daysAgo);
+
+		// Progress component P(x) = Cn^-x	(x is previous success)
+		// Omitted in current version, would need user testing to tune parameters
+
+		// Effort component is {1,10}
+		if (correctness == 0) 
+		{
+			effortFactor = 10.0f;
+		}
+		else
+		{
+			effortFactor = 10f;
+		}
+
+		totalCoefficient = ageFactor * effortFactor;
+
+		return  totalCoefficient;
 	}
 
 	void QueueUpdate () {
