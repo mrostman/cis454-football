@@ -395,7 +395,7 @@ public class DatabaseController : MonoBehaviour {
 		}
 	}
 
-	public ParseObject SelectPlay ()
+	public void SelectPlay ()
 	{
 		Debug.Log (databaseLoaded);
 		float coefficientTotal = CalculateSRSTotal();
@@ -431,19 +431,8 @@ public class DatabaseController : MonoBehaviour {
 				Debug.Log ("more than one set of srs coefficients for current user: ");
 			}
 		}
-
-		bool recentlySeen = TooRecentlySeen(selectedPlay);
-		if (recentlySeen)
-		{
-			selectedPlay = SelectPlay();
-		}
-
-		if (selectedPlay == null) 
-		{
-			Debug.Log ("selectplay return value is null; the system failed to select a play.");
-		}
-
-		return selectedPlay;
+		Debug.Log ("selected play ID: " + selectedPlay.ObjectId);
+		CheckIfRecentlySeen(selectedPlay);
 	}
 
 	private float CalculateSRSTotal ()
@@ -478,33 +467,55 @@ public class DatabaseController : MonoBehaviour {
 		return srsTotal;
 	}
 
-	bool TooRecentlySeen(ParseObject play)
+	private void CheckIfRecentlySeen(ParseObject play)
 	{
-		System.DateTime mostRecent = System.DateTime.MinValue;
-		foreach (ParseObject pastPlay in historyQueryResults) 
-		{
-			string pastPlayID;
-			bool result = pastPlay.TryGetValue("Play", out pastPlayID);
-			if (result){
-				if (play.ObjectId == pastPlayID)
+		ParseQuery<ParseObject> playQuery = ParseObject.GetQuery ("Play")
+			.WhereEqualTo ("Name", play.Get<string>("Name"));
+//		Debug.Log ("selected play's name: " + play.Get<string> ("Name"));
+		playQuery.FindAsync ().ContinueWith (t => {foreach (ParseObject i in t.Result){Debug.Log ("play query matches: " + i.ObjectId);}});
+		ParseQuery<ParseObject> historyQuery = ParseObject.GetQuery ("History")
+			.WhereEqualTo("User", ParseUser.CurrentUser).WhereMatchesQuery("Play", playQuery)
+			.OrderByDescending("updatedAt");
+
+		// tried FirstOrDefaultAsync since it's supposed to solve our exact problem here, but documentation is
+		// nonexistent and has perplexing behavior leading to crashes.
+
+//		historyQuery.FirstOrDefaultAsync().ContinueWith(t => {
+//			Debug.Log ("in history continuation 1");
+//			Debug.Log ("what is t: " + t);
+//			Debug.Log ("is t null? false means null: " + (t!=null));
+//			// the following line crashes silently
+//			Debug.Log ("what is t.Result: " + t.Result);
+//			Debug.Log ("in history continuation 1.5");
+
+		List<ParseObject> historyQueryResult = new List<ParseObject> ();
+		historyQuery.FindAsync().ContinueWith(t => {
+			foreach (ParseObject i in t.Result){
+				historyQueryResult.Add (i);
+			}
+			if (historyQueryResult.Count > 0)
+			{
+				ParseObject pastPlay = historyQueryResult[0];
+
+				string pastPlayID;
+				bool found = pastPlay.TryGetValue(pastPlay.ObjectId, out pastPlayID);
+				if (found)
 				{
-					Debug.Log ("play id: " + play.ObjectId);
 					System.DateTime updatedAt = (System.DateTime)pastPlay.UpdatedAt;
-					if (updatedAt > mostRecent) 
-					{
-						mostRecent = updatedAt;
-					}
+	
+					// If the play was last chosen recently enough to fall within the (day) span set in recencyDelayFactor,
+					// restart the process of selecting a play.
 					System.DateTime difference = System.DateTime.Now - System.TimeSpan.FromDays(1*recencyDelayFactor);
-					Debug.Log ("One day ago: " + difference.ToString());
 					if (updatedAt > System.DateTime.Now - System.TimeSpan.FromDays(1*recencyDelayFactor))
 					{
-						return true;
+						SelectPlay ();
 					}
+					gameController.playLastSeen = updatedAt;
 				}
 			}
-		}
-		gameController.playLastSeen = mostRecent;
-		return false;
+			gameController.currentPlay = play;
+			loadPlay(play.ObjectId);
+		});
 	}
 	
 	public void checkPlayExists(string playName) {
